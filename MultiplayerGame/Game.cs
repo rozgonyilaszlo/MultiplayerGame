@@ -7,39 +7,28 @@ namespace MultiplayerGame
 {
     public partial class Game : Form
     {
-        private AsynchronousSocketListener serverSocket;
-        private AsynchronousClient asynchronousClient;
-        private GameModeType gameModeType;
-        private PlayerData playerData = new PlayerData();
-        //a játékosok adatai
-        private List<PlayerData> playerDatas = new List<PlayerData>();
-        
-
-        public Game(ref AsynchronousSocketListener serverSocket, ref AsynchronousClient asynchronousClient, GameModeType gameModeType, PlayerData playerData)
+        public Game()
         {
             InitializeComponent();
-            this.gameModeType = gameModeType;
-            this.playerData = playerData;
-            
-            if (gameModeType == GameModeType.SERVER)
-            {
-                this.serverSocket = serverSocket;
-                serverSocket.OnMessageReceived = OnMessageReceived;
-            }
-            else if (gameModeType == GameModeType.CLIENT)
-            {
-                this.asynchronousClient = asynchronousClient;
-                asynchronousClient.OnMessageReceived = OnMessageReceived;
-            }
-            else
-            {
-                Console.WriteLine("GameModeType not found.");
-            }
-        }
 
-        private void OnMessageReceived(string data)
-        {
-            MessageBox.Show(data, "Adat jött", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            //player1
+            this.player1.Text = Form1.playerData.Name;
+            this.pictureBox1.Image = Form1.GetCharacterImage(Form1.playerData.Character);
+            this.pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
+            this.progressBar1.Maximum = 100;
+            this.progressBar1.Value = Form1.playerData.Life;
+
+            //player2
+            if (Form1.otherPlayerData != null)
+            {
+                this.player2.Text = Form1.otherPlayerData.Name;
+                this.pictureBox2.Image = Form1.GetCharacterImage(Form1.otherPlayerData.Character);
+                this.pictureBox2.SizeMode = PictureBoxSizeMode.StretchImage;
+                this.progressBar2.Maximum = 100;
+                this.progressBar2.Value = Form1.otherPlayerData.Life;
+            }
+
+            Form1.SendData(Form1.playerData.Name + " belépett a játékba.");
         }
     }
 }

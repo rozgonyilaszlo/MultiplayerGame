@@ -65,7 +65,6 @@
       <DependentUpon>Game.cs</DependentUpon>
     </Compile>
     <Compile Include="Models\GameModeType.cs" />
-    <Compile Include="Models\Package.cs" />
     <Compile Include="Models\PlayerData.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
