@@ -18,10 +18,14 @@ namespace MultiplayerGame
         private AsynchronousSocketListener serverSocket;
         private AsynchronousClient asynchronousClient;
         private GameModeType gameModeType;
+        private PlayerData playerData;
         
         public Form1()
         {
             InitializeComponent();
+
+            playerData = new PlayerData();
+            playerData.Character = 1;
             startGame.Enabled = false;
             
             //Server
@@ -96,10 +100,62 @@ namespace MultiplayerGame
 
         private void startGame_Click(object sender, EventArgs e)
         {
-            Game gameForm = new Game(ref serverSocket, ref asynchronousClient, gameModeType);
+            playerData.Name = textBox1.Text;
+            Game gameForm = new Game(ref serverSocket, ref asynchronousClient, gameModeType, playerData);
             gameForm.Show();
 
             startGame.Enabled = false;
+        }
+
+        //TODO: nem túl szép megoldás, valamit kellen még vele kezdeni :)
+        private void button1_Click(object sender, EventArgs e)
+        {
+            if (((Button)sender).Text == ">")
+            {
+                //következő karakter
+                if (playerData.Character < 5)
+                {
+                    playerData.Character++;
+                }
+                else
+                {
+                    playerData.Character = 1;
+                }
+            }
+            else
+            {
+                //előző karakter
+                if (playerData.Character <= 1)
+                {
+                    playerData.Character = 5;
+                }
+                else
+                {
+                    playerData.Character--;
+                }
+            }
+
+            switch (playerData.Character)
+            {
+                case 1:
+                    pictureBox1.Image = Properties.Resources.player1;
+                    break;
+                case 2:
+                    pictureBox1.Image = Properties.Resources.player2;
+                    break;
+                case 3:
+                    pictureBox1.Image = Properties.Resources.player3;
+                    break;
+                case 4:
+                    pictureBox1.Image = Properties.Resources.player4;
+                    break;
+                case 5:
+                    pictureBox1.Image = Properties.Resources.player5;
+                    break;
+                default:
+                    pictureBox1.Image = Properties.Resources.player1;
+                    break;
+            }
         }
     }
 }

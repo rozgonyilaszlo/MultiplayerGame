@@ -1,15 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Xml.Serialization;
-using Newtonsoft.Json;
+using System.Collections.Generic;
 using MultiplayerGame.Models;
 
 namespace MultiplayerGame
@@ -19,12 +10,17 @@ namespace MultiplayerGame
         private AsynchronousSocketListener serverSocket;
         private AsynchronousClient asynchronousClient;
         private GameModeType gameModeType;
+        private PlayerData playerData = new PlayerData();
+        //a játékosok adatai
+        private List<PlayerData> playerDatas = new List<PlayerData>();
         
-        public Game(ref AsynchronousSocketListener serverSocket, ref AsynchronousClient asynchronousClient, GameModeType gameModeType)
+
+        public Game(ref AsynchronousSocketListener serverSocket, ref AsynchronousClient asynchronousClient, GameModeType gameModeType, PlayerData playerData)
         {
             InitializeComponent();
             this.gameModeType = gameModeType;
-
+            this.playerData = playerData;
+            
             if (gameModeType == GameModeType.SERVER)
             {
                 this.serverSocket = serverSocket;

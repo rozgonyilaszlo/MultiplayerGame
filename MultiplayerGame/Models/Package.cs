@@ -8,16 +8,11 @@ namespace MultiplayerGame.Models
 {
     public class Package
     {
-        //TODO: valamit kezdeni ezzel az egész osztállyal
-
-        //TODO: ilyet is bekérni a usertől
-        public String UserName { get; set; }
+        //TODO: Hashelve a username
+        public String UserId { get; set; }
 
         public int X { get; set; }
 
         public int Y { get; set; }
-
-        //NOTE: ide bármit lehet írni
-        public String Text { get; set; }
     }
 }
