@@ -127,6 +127,7 @@
             this.startGame.TabIndex = 9;
             this.startGame.Text = "játék indítása";
             this.startGame.UseVisualStyleBackColor = true;
+            this.startGame.Click += new System.EventHandler(this.startGame_Click);
             // 
             // Form1
             // 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MultiplayerGame.Models;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -12,26 +13,18 @@ namespace MultiplayerGame
 {
     public partial class Form1 : Form
     {
-        //server
-        public AsynchronousSocketListener serverSocket;
-        //client
-        public AsynchronousClient asynchronousClient;
-
-        void Connected()
-        {
-            events.Text += "Kapcsolódva.";
-            startGame.Enabled = true;
-        }
-
+        //TODO: ha a szerver elérhetetlen lesz, valamit kezdeni vele.
+        
+        private AsynchronousSocketListener serverSocket;
+        private AsynchronousClient asynchronousClient;
+        private GameModeType gameModeType;
+        
         public Form1()
         {
             InitializeComponent();
-
             startGame.Enabled = false;
-        }
-
-        private void startServer_Click(object sender, EventArgs e)
-        {
+            
+            //Server
             serverSocket = new AsynchronousSocketListener();
 
             serverSocket.OnClientConnected = OnClientConnected;
@@ -39,6 +32,14 @@ namespace MultiplayerGame
             serverSocket.OnMessageReceived = OnMessageReceived;
             serverSocket.OnMessageSent = OnMessageSent;
 
+            //Client
+            asynchronousClient = new AsynchronousClient();
+            asynchronousClient.OnConnected = Connected;
+        }
+
+        private void startServer_Click(object sender, EventArgs e)
+        {
+            gameModeType = GameModeType.SERVER;
             serverSocket.Initialize();
             addressLabel.Text = serverSocket.LocalAddress.ToString();
 
@@ -48,6 +49,12 @@ namespace MultiplayerGame
             connectToServer.Enabled = false;
 
             events.Text += "Szerver elindítva az alábbi címen: " + serverSocket.LocalAddress.ToString();
+        }
+
+        private void Connected()
+        {
+            events.Text += "Kapcsolódva.";
+            startGame.Enabled = true;
         }
 
         private void OnClientConnected(string client)
@@ -74,12 +81,11 @@ namespace MultiplayerGame
 
         private void connectToServer_Click(object sender, EventArgs e)
         {
-            asynchronousClient = new AsynchronousClient();
-            asynchronousClient.OnConnected = Connected;
             try
             {
                 startServer.Enabled = false;
                 asynchronousClient.Connect(addressTextBox.Text);
+                gameModeType = GameModeType.CLIENT;
             }
             catch (Exception exp)
             {
@@ -88,6 +94,12 @@ namespace MultiplayerGame
             }
         }
 
-        
+        private void startGame_Click(object sender, EventArgs e)
+        {
+            Game gameForm = new Game(ref serverSocket, ref asynchronousClient, gameModeType);
+            gameForm.Show();
+
+            startGame.Enabled = false;
+        }
     }
 }
