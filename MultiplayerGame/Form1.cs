@@ -16,6 +16,7 @@ namespace MultiplayerGame
     {
         //TODO: ha a szerver elérhetetlen lesz, valamit kezdeni vele.
 
+        Game gameForm;
         private static AsynchronousSocketListener serverSocket;
         private static AsynchronousClient asynchronousClient;
         public static GameModeType gameModeType;
@@ -36,13 +37,11 @@ namespace MultiplayerGame
             serverSocket.OnClientConnected = OnClientConnected;
             serverSocket.OnClientDisconnected = OnClientDisconnected;
             serverSocket.OnMessageReceived = OnMessageReceived;
-            serverSocket.OnMessageSent = OnMessageSent;
 
             //Client
             asynchronousClient = new AsynchronousClient();
             asynchronousClient.OnConnected = Connected;
             asynchronousClient.OnMessageReceived = OnMessageReceived;
-            asynchronousClient.OnMessageSent = OnMessageSent;
         }
 
         private void startServer_Click(object sender, EventArgs e)
@@ -79,22 +78,17 @@ namespace MultiplayerGame
 
         private void OnMessageReceived(string message)
         {
-            events.Text += "Message: " + message;
-
             try
             {
                 PlayerData data = JsonConvert.DeserializeObject<PlayerData>(message);
                 otherPlayerData = data;
+                gameForm.UpdateGame();
             }
             catch (Exception exp)
             {
+                events.Text += "Message: " + message;
                 Console.WriteLine("Nem player data volt.");
             }
-        }
-
-        private void OnMessageSent()
-        {
-            events.Text += "Küldés sikerült.";
         }
 
         private void connectToServer_Click(object sender, EventArgs e)
@@ -116,7 +110,7 @@ namespace MultiplayerGame
         {
             playerData.Name = textBox1.Text;
             SendData(JsonConvert.SerializeObject(playerData));
-            Game gameForm = new Game();
+            gameForm = new Game();
             gameForm.Show();
             
             startGame.Enabled = false;
@@ -124,6 +118,20 @@ namespace MultiplayerGame
 
         public static void SendData(string data)
         {
+            if (gameModeType == GameModeType.CLIENT)
+            {
+                asynchronousClient.Send(data);
+            }
+            else if (gameModeType == GameModeType.SERVER)
+            {
+                serverSocket.Send(data);
+            }
+        }
+
+        public static void SendPlayerData(PlayerData playerData)
+        {
+            string data = JsonConvert.SerializeObject(playerData);
+
             if (gameModeType == GameModeType.CLIENT)
             {
                 asynchronousClient.Send(data);

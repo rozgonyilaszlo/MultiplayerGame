@@ -26,9 +26,13 @@ namespace MultiplayerGame.Models
 
         public PlayerData()
         {
-            this.Life = 100;
+            this.Life = Constant.Life;
 
-            //TODO: véletlenszerűen legenerálni, hogy hol legyen
+            //véletlenszerűen elhelyezi a pályán
+            //700 * 450-es a form
+            Random random = new Random();
+            this.X = random.Next(0, Constant.GameAreaSizeX);
+            this.Y = random.Next(0, Constant.GameAreaSizeY);
         }
     }
 }

@@ -64,6 +64,7 @@
     <Compile Include="Game.Designer.cs">
       <DependentUpon>Game.cs</DependentUpon>
     </Compile>
+    <Compile Include="Models\Constant.cs" />
     <Compile Include="Models\GameModeType.cs" />
     <Compile Include="Models\PlayerData.cs" />
     <Compile Include="Program.cs" />
