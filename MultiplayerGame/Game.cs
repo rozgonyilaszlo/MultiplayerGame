@@ -10,7 +10,10 @@ namespace MultiplayerGame
     {
         private int myScore = 0;
         private int enemyScore = 0;
+        private Graphics graphics;
+        private Pen pen;
 
+        //TODO: refactor
         public Game()
         {
             InitializeComponent();
@@ -19,6 +22,9 @@ namespace MultiplayerGame
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
+
+            pen = new Pen(Color.FromKnownColor(KnownColor.Red));
+            graphics = this.CreateGraphics();
 
             //player1
             if (Form1.playerData != null)
@@ -38,6 +44,8 @@ namespace MultiplayerGame
                 this.progressBar2.Value = Form1.otherPlayerData.Life;
             }
 
+            ReDrawGun();
+
             label1.Text = "Eredmény: " + myScore;
             label2.Text = "Eredmény: " + enemyScore;
 
@@ -47,6 +55,7 @@ namespace MultiplayerGame
             Form1.SendData(Form1.playerData.Name + " belépett a játékba.");
         }
 
+        //TODO: refactor
         public void UpdateGame()
         {
             if (Form1.playerData != null)
@@ -60,7 +69,7 @@ namespace MultiplayerGame
                 }
                 catch (Exception e)
                 {
-                    MessageBox.Show("vesztettél.", "mecs vége", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Vesztettél.", "Mérközés vége.", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     enemyScore++;
                     label2.Text = "Eredmény: " + enemyScore;
                     RestartGame();
@@ -81,11 +90,13 @@ namespace MultiplayerGame
                 }
                 catch (Exception e)
                 {
-                    MessageBox.Show("nyertél.", "mecs vége", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Nyertél.", "Mérközés vége.", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     myScore++;
                     label1.Text = "Eredmény: " + myScore;
                     RestartGame();
                 }
+
+                ReDrawGun();
             }
         }
         
@@ -95,7 +106,7 @@ namespace MultiplayerGame
                 Character = Form1.playerData.Character,
                 Name = Form1.playerData.Name
             };
-            Form1.SendPlayerData(Form1.playerData);
+            Form1.SendData(Form1.playerData);
         }
 
         private void Game_KeyDown(object sender, KeyEventArgs e)
@@ -110,11 +121,8 @@ namespace MultiplayerGame
                 {
                     player1InGame.Top = Form1.playerData.Y - Constant.Step;
                     Form1.playerData.Y = Form1.playerData.Y - Constant.Step;
-                    Form1.SendPlayerData(Form1.playerData);
+                    Form1.playerData.HintY = Form1.playerData.HintY - Constant.Step;
                 }
-
-                Form1.SendPlayerData(Form1.playerData);
-                UpdateGame();
             }
             else if (e.KeyCode == Keys.S)
             {
@@ -126,10 +134,8 @@ namespace MultiplayerGame
                 {
                     player1InGame.Top = Form1.playerData.Y + Constant.Step;
                     Form1.playerData.Y = Form1.playerData.Y + Constant.Step;
+                    Form1.playerData.HintY = Form1.playerData.HintY + Constant.Step;
                 }
-
-                Form1.SendPlayerData(Form1.playerData);
-                UpdateGame();
             }
             else if (e.KeyCode == Keys.A)
             {
@@ -141,10 +147,8 @@ namespace MultiplayerGame
                 {
                     player1InGame.Left = Form1.playerData.X - Constant.Step;
                     Form1.playerData.X = Form1.playerData.X - Constant.Step;
+                    Form1.playerData.HintX = Form1.playerData.HintX - Constant.Step;
                 }
-
-                Form1.SendPlayerData(Form1.playerData);
-                UpdateGame();
             }
             else if (e.KeyCode == Keys.D)
             {
@@ -156,35 +160,80 @@ namespace MultiplayerGame
                 {
                     player1InGame.Left = Form1.playerData.X + Constant.Step;
                     Form1.playerData.X = Form1.playerData.X + Constant.Step;
+                    Form1.playerData.HintX = Form1.playerData.HintX + Constant.Step;
                 }
-
-                Form1.SendPlayerData(Form1.playerData);
-                UpdateGame();
             }
             else if (e.KeyCode == Keys.K)
             {
-                //TODO: ezt még átgondolni
-                Image img = player1InGame.Image;
-                img.RotateFlip(RotateFlipType.Rotate90FlipNone);
-                player1InGame.Image = img;
+                RotateTheGun(-4);
             }
             else if (e.KeyCode == Keys.L)
             {
-                //TODO: ezt még átgondolni
-                Image img = player1InGame.Image;
-                img.RotateFlip(RotateFlipType.Rotate90FlipNone);
-                player1InGame.Image = img;
+                RotateTheGun(4);
             }
             else if (e.KeyCode == Keys.Space)
             {
-                //TODO: ezt még átgondolni
+                Fire();
+            }
 
-                //fire!!!
+            ReDrawGun();
+            Form1.SendData(Form1.playerData);
+            UpdateGame();
+        }
+
+        private void ReDrawGun()
+        {
+            graphics.Clear(this.BackColor);
+
+            if (Form1.playerData != null)
+            {
+                graphics.DrawLine(pen, Form1.playerData.X + (Constant.PlayerSizeInGame / 2), Form1.playerData.Y + (Constant.PlayerSizeInGame / 2), Form1.playerData.HintX, Form1.playerData.HintY);
+            }
+            else if (Form1.otherPlayerData != null)
+            {
+                graphics.DrawLine(pen, Form1.otherPlayerData.X - (Constant.PlayerSizeInGame / 2), Form1.otherPlayerData.Y - (Constant.PlayerSizeInGame / 2), Form1.otherPlayerData.HintX, Form1.otherPlayerData.HintY);
+            }
+        }
+
+        private void RotateTheGun(int point)
+        {
+            //ellenőrizni, hogy melyik negyedívben van.
+
+            if ((Form1.playerData.HintX <= Form1.playerData.X) && (Form1.playerData.HintY <= Form1.playerData.Y))
+            {
+                //bal felső
+                Form1.playerData.HintX = Form1.playerData.HintX + point;
+                Form1.playerData.HintY = Form1.playerData.HintY - point;
+            }
+            else if ((Form1.playerData.HintX >= Form1.playerData.X) && (Form1.playerData.HintY <= Form1.playerData.Y))
+            {
+                //jobb felső
+                Form1.playerData.HintX = Form1.playerData.HintX + point;
+                Form1.playerData.HintY = Form1.playerData.HintY + point;
+            }
+            else if ((Form1.playerData.HintX >= Form1.playerData.X) && (Form1.playerData.HintY >= Form1.playerData.Y))
+            {
+                //jobb alsó
+                Form1.playerData.HintX = Form1.playerData.HintX - point;
+                Form1.playerData.HintY = Form1.playerData.HintY + point;
+            }
+            else if ((Form1.playerData.HintX <= Form1.playerData.X) && (Form1.playerData.HintY >= Form1.playerData.Y))
+            {
+                //bal alsó
+                Form1.playerData.HintX = Form1.playerData.HintX - point;
+                Form1.playerData.HintY = Form1.playerData.HintY - point;
             }
             else
             {
-                Console.WriteLine("ismeretlen billentyű");
+                Console.WriteLine("Valami gond lépett fel a forgatás közbe.");
             }
+        }
+
+        private void Fire()
+        {
+            //TODO: logikát, megnézni, hogy közel volt-e
+
+            Form1.SendData(new Fire());
         }
     }
 }

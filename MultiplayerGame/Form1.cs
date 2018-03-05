@@ -15,6 +15,7 @@ namespace MultiplayerGame
     public partial class Form1 : Form
     {
         //TODO: ha a szerver elérhetetlen lesz, valamit kezdeni vele.
+        //NOTE: a küldés elszáll a kliensnél, a szervernél van esemény. ebből kell kiindulni
 
         Game gameForm;
         private static AsynchronousSocketListener serverSocket;
@@ -22,7 +23,7 @@ namespace MultiplayerGame
         public static GameModeType gameModeType;
         public static PlayerData playerData;
         public static PlayerData otherPlayerData;
-
+        
         public Form1()
         {
             InitializeComponent();
@@ -33,7 +34,6 @@ namespace MultiplayerGame
 
             //Server
             serverSocket = new AsynchronousSocketListener();
-
             serverSocket.OnClientConnected = OnClientConnected;
             serverSocket.OnClientDisconnected = OnClientDisconnected;
             serverSocket.OnMessageReceived = OnMessageReceived;
@@ -43,13 +43,12 @@ namespace MultiplayerGame
             asynchronousClient.OnConnected = Connected;
             asynchronousClient.OnMessageReceived = OnMessageReceived;
         }
-
+        
         private void startServer_Click(object sender, EventArgs e)
         {
             gameModeType = GameModeType.SERVER;
-            serverSocket.Initialize();
-            addressLabel.Text = serverSocket.LocalAddress.ToString();
 
+            serverSocket.Initialize();
             serverSocket.StartListening();
 
             addressTextBox.Enabled = false;
@@ -64,18 +63,19 @@ namespace MultiplayerGame
             startGame.Enabled = true;
         }
 
+        //TODO: ugyanaz a connected event legyen
         private void OnClientConnected(string client)
         {
-            events.Text += "Kliens csatlakozva: " + client;
+            events.Text += "Kapcsolódva.";
             startGame.Enabled = true;
         }
 
         private void OnClientDisconnected()
         {
-            events.Text += "Kliens lecsatlakozott";
+            events.Text += "Kliens lecsatlakozott.";
             startGame.Enabled = false;
         }
-
+        
         private void OnMessageReceived(string message)
         {
             try
@@ -84,13 +84,23 @@ namespace MultiplayerGame
                 otherPlayerData = data;
                 gameForm.UpdateGame();
             }
-            catch (Exception exp)
+            catch (Exception e)
             {
-                events.Text += "Message: " + message;
-                Console.WriteLine("Nem player data volt.");
+                try
+                {
+                    Fire fire = JsonConvert.DeserializeObject<Fire>(message);
+                    playerData.Life = playerData.Life - Constant.DamageFromFire;
+
+                    Form1.SendData(Form1.playerData);
+                    gameForm.UpdateGame();
+                }
+                catch (Exception exp)
+                {
+                    events.Text += "Message: " + message;
+                }
             }
         }
-
+        
         private void connectToServer_Click(object sender, EventArgs e)
         {
             try
@@ -105,44 +115,32 @@ namespace MultiplayerGame
                 startServer.Enabled = true;
             }
         }
-
+        
         private void startGame_Click(object sender, EventArgs e)
         {
             playerData.Name = textBox1.Text;
-            SendData(JsonConvert.SerializeObject(playerData));
+            SendData(playerData);
+
             gameForm = new Game();
             gameForm.Show();
             
             startGame.Enabled = false;
         }
 
-        public static void SendData(string data)
+        public static void SendData(object @object)
         {
-            if (gameModeType == GameModeType.CLIENT)
-            {
-                asynchronousClient.Send(data);
-            }
-            else if (gameModeType == GameModeType.SERVER)
-            {
-                serverSocket.Send(data);
-            }
-        }
-
-        public static void SendPlayerData(PlayerData playerData)
-        {
-            string data = JsonConvert.SerializeObject(playerData);
+            string serializedObject = JsonConvert.SerializeObject(@object);
 
             if (gameModeType == GameModeType.CLIENT)
             {
-                asynchronousClient.Send(data);
+                asynchronousClient.Send(serializedObject);
             }
             else if (gameModeType == GameModeType.SERVER)
             {
-                serverSocket.Send(data);
+                serverSocket.Send(serializedObject);
             }
         }
 
-        //TODO: nem túl szép megoldás, valamit kellen még vele kezdeni :)
         private void button1_Click(object sender, EventArgs e)
         {
             if (((Button)sender).Text == ">")
