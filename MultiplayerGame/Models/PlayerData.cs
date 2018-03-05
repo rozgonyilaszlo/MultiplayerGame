@@ -25,7 +25,7 @@ namespace MultiplayerGame.Models
             Random random = new Random();
             this.X = random.Next(0, (Constant.GameAreaSizeX - Constant.PlayerSizeInGame));
             this.Y = random.Next(100, (Constant.GameAreaSizeY - Constant.PlayerSizeInGame));
-            this.HintY = this.Y - 100;
+            this.HintY = this.Y + Constant.FireRange;
             this.HintX = (this.X + (Constant.PlayerSizeInGame / 2));
         }
     }

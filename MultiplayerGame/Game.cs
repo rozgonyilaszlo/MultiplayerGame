@@ -12,6 +12,7 @@ namespace MultiplayerGame
         private int enemyScore = 0;
         private Graphics graphics;
         private Pen pen;
+        private int angle = 90;
 
         //TODO: refactor
         public Game()
@@ -165,11 +166,11 @@ namespace MultiplayerGame
             }
             else if (e.KeyCode == Keys.K)
             {
-                RotateTheGun(-4);
+                RotateTheGun(10, Rotate.LEFT);
             }
             else if (e.KeyCode == Keys.L)
             {
-                RotateTheGun(4);
+                RotateTheGun(10, Rotate.RIGHT);
             }
             else if (e.KeyCode == Keys.Space)
             {
@@ -195,38 +196,22 @@ namespace MultiplayerGame
             }
         }
 
-        private void RotateTheGun(int point)
+        private void RotateTheGun(int angle, Rotate rotate)
         {
-            //ellenőrizni, hogy melyik negyedívben van.
+            if (rotate == Rotate.LEFT)
+            {
+                this.angle -= angle;
+            }
+            else if (rotate == Rotate.RIGHT)
+            {
+                this.angle += angle;
+            }
 
-            if ((Form1.playerData.HintX <= Form1.playerData.X) && (Form1.playerData.HintY <= Form1.playerData.Y))
-            {
-                //bal felső
-                Form1.playerData.HintX = Form1.playerData.HintX + point;
-                Form1.playerData.HintY = Form1.playerData.HintY - point;
-            }
-            else if ((Form1.playerData.HintX >= Form1.playerData.X) && (Form1.playerData.HintY <= Form1.playerData.Y))
-            {
-                //jobb felső
-                Form1.playerData.HintX = Form1.playerData.HintX + point;
-                Form1.playerData.HintY = Form1.playerData.HintY + point;
-            }
-            else if ((Form1.playerData.HintX >= Form1.playerData.X) && (Form1.playerData.HintY >= Form1.playerData.Y))
-            {
-                //jobb alsó
-                Form1.playerData.HintX = Form1.playerData.HintX - point;
-                Form1.playerData.HintY = Form1.playerData.HintY + point;
-            }
-            else if ((Form1.playerData.HintX <= Form1.playerData.X) && (Form1.playerData.HintY >= Form1.playerData.Y))
-            {
-                //bal alsó
-                Form1.playerData.HintX = Form1.playerData.HintX - point;
-                Form1.playerData.HintY = Form1.playerData.HintY - point;
-            }
-            else
-            {
-                Console.WriteLine("Valami gond lépett fel a forgatás közbe.");
-            }
+            int x = Convert.ToInt32(Math.Round(Math.Cos(((Math.PI / 180) * this.angle)) * Constant.FireRange));
+            int y = Convert.ToInt32(Math.Round(Math.Sin(((Math.PI / 180) * this.angle)) * Constant.FireRange));
+
+            Form1.playerData.HintX = (Form1.playerData.X + (Constant.PlayerSizeInGame / 2)) + x;
+            Form1.playerData.HintY = (Form1.playerData.Y + (Constant.PlayerSizeInGame / 2)) + y;
         }
 
         private void Fire()

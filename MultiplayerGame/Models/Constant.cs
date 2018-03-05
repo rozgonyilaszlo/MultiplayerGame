@@ -11,5 +11,6 @@ namespace MultiplayerGame.Models
         public static int DamageFromTheWall = 5;
         public static int DamageFromFire = 10;
         public static int PlayerSizeInGame = 32;
+        public static int FireRange = 100;
     }
 }
