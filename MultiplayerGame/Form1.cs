@@ -1,14 +1,8 @@
-﻿using MultiplayerGame.Models;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
+﻿using System;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using MultiplayerGame.Models;
+using Newtonsoft.Json;
 
 namespace MultiplayerGame
 {
@@ -16,6 +10,7 @@ namespace MultiplayerGame
     {
         //TODO: ha a szerver elérhetetlen lesz, valamit kezdeni vele.
         //NOTE: a küldés elszáll a kliensnél, a szervernél van esemény. ebből kell kiindulni
+        //TODO: névre illetve karakterre egyezést lehetne ellenőrizni
 
         Game gameForm;
         private static AsynchronousSocketListener serverSocket;
@@ -76,15 +71,10 @@ namespace MultiplayerGame
             startGame.Enabled = false;
         }
         
+        //TODO: valamit még kellene kezdeni vele, mert nem túl elegáns, de működik
         private void OnMessageReceived(string message)
         {
-            try
-            {
-                PlayerData data = JsonConvert.DeserializeObject<PlayerData>(message);
-                otherPlayerData = data;
-                gameForm.UpdateGame();
-            }
-            catch (Exception e)
+            if (message.Contains("\"Shoted\":true"))
             {
                 try
                 {
@@ -94,8 +84,22 @@ namespace MultiplayerGame
                     Form1.SendData(Form1.playerData);
                     gameForm.UpdateGame();
                 }
-                catch (Exception exp)
+                catch (Exception e)
                 {
+                    events.Text += "Exception: " + e.Message;
+                }
+            }
+            else
+            {
+                try
+                {
+                    PlayerData data = JsonConvert.DeserializeObject<PlayerData>(message);
+                    otherPlayerData = data;
+                    gameForm.UpdateGame();
+                }
+                catch (Exception e)
+                {
+                    events.Text += "Exception: " + e.Message;
                     events.Text += "Message: " + message;
                 }
             }
@@ -145,7 +149,6 @@ namespace MultiplayerGame
         {
             if (((Button)sender).Text == ">")
             {
-                //következő karakter
                 if (playerData.Character < 5)
                 {
                     playerData.Character++;
@@ -157,7 +160,6 @@ namespace MultiplayerGame
             }
             else
             {
-                //előző karakter
                 if (playerData.Character <= 1)
                 {
                     playerData.Character = 5;

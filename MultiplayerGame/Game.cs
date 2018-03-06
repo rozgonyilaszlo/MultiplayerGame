@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Windows.Forms;
-using System.Collections.Generic;
 using MultiplayerGame.Models;
 using System.Drawing;
 
@@ -13,8 +12,7 @@ namespace MultiplayerGame
         private Graphics graphics;
         private Pen pen;
         private int angle = 90;
-
-        //TODO: refactor
+        
         public Game()
         {
             InitializeComponent();
@@ -26,8 +24,7 @@ namespace MultiplayerGame
 
             pen = new Pen(Color.FromKnownColor(KnownColor.Red));
             graphics = this.CreateGraphics();
-
-            //player1
+            
             if (Form1.playerData != null)
             {
                 this.player1.Text = Form1.playerData.Name;
@@ -35,8 +32,7 @@ namespace MultiplayerGame
                 this.progressBar1.Maximum = 100;
                 this.progressBar1.Value = Form1.playerData.Life;
             }
-
-            //player2
+            
             if (Form1.otherPlayerData != null)
             {
                 this.player2.Text = Form1.otherPlayerData.Name;
@@ -52,11 +48,8 @@ namespace MultiplayerGame
 
             player1.BringToFront();
             player2.BringToFront();
-
-            Form1.SendData(Form1.playerData.Name + " belépett a játékba.");
         }
-
-        //TODO: refactor
+        
         public void UpdateGame()
         {
             if (Form1.playerData != null)
@@ -64,11 +57,11 @@ namespace MultiplayerGame
                 player1InGame.Image = Form1.GetCharacterImage(Form1.playerData.Character);
                 player1InGame.Left = Form1.playerData.X;
                 player1InGame.Top = Form1.playerData.Y;
-                try
+                if (Form1.playerData.Life > 0)
                 {
                     this.progressBar1.Value = Form1.playerData.Life;
                 }
-                catch (Exception e)
+                else
                 {
                     MessageBox.Show("Vesztettél.", "Mérközés vége.", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     enemyScore++;
@@ -76,8 +69,7 @@ namespace MultiplayerGame
                     RestartGame();
                 }
             }
-
-            //player2 adatainak a frissítése
+            
             if (Form1.otherPlayerData != null)
             {
                 player2InGame.Image = Form1.GetCharacterImage(Form1.otherPlayerData.Character);
@@ -85,34 +77,72 @@ namespace MultiplayerGame
                 player2InGame.Top = Form1.otherPlayerData.Y;
                 this.player2.Text = Form1.otherPlayerData.Name;
                 this.pictureBox2.Image = Form1.GetCharacterImage(Form1.otherPlayerData.Character);
-                try
+                if (Form1.otherPlayerData.Life > 0)
                 {
                     this.progressBar2.Value = Form1.otherPlayerData.Life;
                 }
-                catch (Exception e)
+                else
                 {
                     MessageBox.Show("Nyertél.", "Mérközés vége.", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     myScore++;
                     label1.Text = "Eredmény: " + myScore;
                     RestartGame();
                 }
-
-                ReDrawGun();
             }
         }
         
         private void RestartGame()
         {
+            this.angle = 90;
+
             Form1.playerData = new PlayerData() {
                 Character = Form1.playerData.Character,
                 Name = Form1.playerData.Name
             };
+
             Form1.SendData(Form1.playerData);
         }
 
+        //TODO: kiszervezni
         private void Game_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.W)
+            {
+                PlayerMoved(PlayerMove.UP);
+            }
+            else if (e.KeyCode == Keys.S)
+            {
+                PlayerMoved(PlayerMove.DOWN);
+            }
+            else if (e.KeyCode == Keys.A)
+            {
+                PlayerMoved(PlayerMove.LEFT);
+            }
+            else if (e.KeyCode == Keys.D)
+            {
+                PlayerMoved(PlayerMove.RIGHT);
+            }
+            else if (e.KeyCode == Keys.K)
+            {
+                RotateTheGun(Constant.RotateGrad, Rotate.LEFT);
+            }
+            else if (e.KeyCode == Keys.L)
+            {
+                RotateTheGun(Constant.RotateGrad, Rotate.RIGHT);
+            }
+            else if (e.KeyCode == Keys.Space)
+            {
+                Fire();
+            }
+
+            Form1.SendData(Form1.playerData);
+            ReDrawGun();
+            UpdateGame();
+        }
+
+        private void PlayerMoved(PlayerMove playerMove)
+        {
+            if (playerMove == PlayerMove.UP)
             {
                 if (0 > Form1.playerData.Y)
                 {
@@ -125,7 +155,7 @@ namespace MultiplayerGame
                     Form1.playerData.HintY = Form1.playerData.HintY - Constant.Step;
                 }
             }
-            else if (e.KeyCode == Keys.S)
+            else if (playerMove == PlayerMove.DOWN)
             {
                 if ((Constant.GameAreaSizeY - Constant.PlayerSizeInGame) <= (Form1.playerData.Y + Constant.PlayerSizeInGame))
                 {
@@ -138,7 +168,7 @@ namespace MultiplayerGame
                     Form1.playerData.HintY = Form1.playerData.HintY + Constant.Step;
                 }
             }
-            else if (e.KeyCode == Keys.A)
+            else if (playerMove == PlayerMove.LEFT)
             {
                 if (0 > Form1.playerData.X)
                 {
@@ -151,7 +181,7 @@ namespace MultiplayerGame
                     Form1.playerData.HintX = Form1.playerData.HintX - Constant.Step;
                 }
             }
-            else if (e.KeyCode == Keys.D)
+            else if (playerMove == PlayerMove.RIGHT)
             {
                 if ((Constant.GameAreaSizeX - Constant.PlayerSizeInGame) <= (Form1.playerData.X + Constant.PlayerSizeInGame))
                 {
@@ -164,22 +194,6 @@ namespace MultiplayerGame
                     Form1.playerData.HintX = Form1.playerData.HintX + Constant.Step;
                 }
             }
-            else if (e.KeyCode == Keys.K)
-            {
-                RotateTheGun(10, Rotate.LEFT);
-            }
-            else if (e.KeyCode == Keys.L)
-            {
-                RotateTheGun(10, Rotate.RIGHT);
-            }
-            else if (e.KeyCode == Keys.Space)
-            {
-                Fire();
-            }
-
-            ReDrawGun();
-            Form1.SendData(Form1.playerData);
-            UpdateGame();
         }
 
         private void ReDrawGun()
@@ -216,9 +230,14 @@ namespace MultiplayerGame
 
         private void Fire()
         {
-            //TODO: logikát, megnézni, hogy közel volt-e
-
-            Form1.SendData(new Fire());
+            //ez a négyzet okozza a sebzést
+            var rect = new Rectangle(new Point(Form1.playerData.HintX, Form1.playerData.HintY), new Size(Constant.HalfPlayerSizeInGame, Constant.HalfPlayerSizeInGame));
+            graphics.DrawRectangle(pen, rect);
+            
+            if (player2InGame.Bounds.IntersectsWith(rect))
+            {
+                Form1.SendData(new Fire());
+            }
         }
     }
 }
