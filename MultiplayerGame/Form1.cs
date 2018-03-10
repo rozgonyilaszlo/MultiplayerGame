@@ -10,21 +10,22 @@ namespace MultiplayerGame
     {
         //TODO: ha a szerver elérhetetlen lesz, valamit kezdeni vele.
         //NOTE: a küldés elszáll a kliensnél, a szervernél van esemény. ebből kell kiindulni
+        
         //TODO: névre illetve karakterre egyezést lehetne ellenőrizni
 
         Game gameForm;
-        private static AsynchronousSocketListener serverSocket;
-        private static AsynchronousClient asynchronousClient;
-        public static GameModeType gameModeType;
-        public static PlayerData playerData;
-        public static PlayerData otherPlayerData;
+        private AsynchronousSocketListener serverSocket;
+        private AsynchronousClient asynchronousClient;
+        public GameModeType gameModeType;
+        public PlayerData playerData;
+        public PlayerData otherPlayerData;
         
         public Form1()
         {
             InitializeComponent();
 
             playerData = new PlayerData();
-            playerData.Character = 1;
+            
             startGame.Enabled = false;
 
             //Server
@@ -81,7 +82,7 @@ namespace MultiplayerGame
                     Fire fire = JsonConvert.DeserializeObject<Fire>(message);
                     playerData.Life = playerData.Life - Constant.DamageFromFire;
 
-                    Form1.SendData(Form1.playerData);
+                    SendData(playerData);
                     gameForm.UpdateGame();
                 }
                 catch (Exception e)
@@ -125,13 +126,13 @@ namespace MultiplayerGame
             playerData.Name = textBox1.Text;
             SendData(playerData);
 
-            gameForm = new Game();
+            gameForm = new Game(parent: this);
             gameForm.Show();
             
             startGame.Enabled = false;
         }
 
-        public static void SendData(object @object)
+        public void SendData(object @object)
         {
             string serializedObject = JsonConvert.SerializeObject(@object);
 
@@ -173,7 +174,7 @@ namespace MultiplayerGame
             pictureBox1.Image = GetCharacterImage(playerData.Character);
         }
 
-        public static Bitmap GetCharacterImage(int id)
+        public Bitmap GetCharacterImage(int id)
         {
             switch (id)
             {

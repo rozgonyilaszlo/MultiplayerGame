@@ -10,23 +10,26 @@ namespace MultiplayerGame.Models
 
         public int Life { get; set; }
 
-        public int X { get; set; }
+        public Coordinate PlayerCoordinate { get; set; }
 
-        public int Y { get; set; }
-
-        public int HintX { get; set; }
-
-        public int HintY { get; set; }
-
+        public Coordinate HintCoordinate { get; set; }
+        
         public PlayerData()
         {
             this.Life = Constant.Life;
-            
+            this.Character = 1;
+
             Random random = new Random();
-            this.X = random.Next(0, (Constant.GameAreaSizeX - Constant.PlayerSizeInGame));
-            this.Y = random.Next(100, (Constant.GameAreaSizeY - Constant.PlayerSizeInGame));
-            this.HintY = this.Y + Constant.FireRange;
-            this.HintX = (this.X + (Constant.PlayerSizeInGame / 2));
+            this.PlayerCoordinate = new Coordinate(random.Next(0, (Constant.GameAreaSizeX - Constant.PlayerSizeInGame)),
+                random.Next(100, (Constant.GameAreaSizeY - Constant.PlayerSizeInGame)));
+
+            this.HintCoordinate = new Coordinate(this.PlayerCoordinate.X + Constant.HalfPlayerSizeInGame, this.PlayerCoordinate.Y + Constant.FireRange);
+        }
+
+        public override string ToString()
+        {
+            return String.Format("Player: [Name = {0}, Character = {1}, Life = {2}, PlayerCoordinate = {3}, HintCoordinate = {4}]", 
+                this.Name, this.Character, this.Life, this.PlayerCoordinate.ToString(), this.HintCoordinate.ToString());
         }
     }
 }

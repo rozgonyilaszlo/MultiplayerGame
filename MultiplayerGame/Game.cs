@@ -7,15 +7,19 @@ namespace MultiplayerGame
 {
     public partial class Game : Form
     {
+        private Form1 parent;
+
         private int myScore = 0;
         private int enemyScore = 0;
         private Graphics graphics;
         private Pen pen;
         private int angle = 90;
         
-        public Game()
+        public Game(Form1 parent)
         {
             InitializeComponent();
+
+            this.parent = parent;
 
             //ne lehessen átméretezni az ablakot
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -25,20 +29,20 @@ namespace MultiplayerGame
             pen = new Pen(Color.FromKnownColor(KnownColor.Red));
             graphics = this.CreateGraphics();
             
-            if (Form1.playerData != null)
+            if (parent.playerData != null)
             {
-                this.player1.Text = Form1.playerData.Name;
-                this.pictureBox1.Image = Form1.GetCharacterImage(Form1.playerData.Character);
+                this.player1.Text = parent.playerData.Name;
+                this.pictureBox1.Image = parent.GetCharacterImage(parent.playerData.Character);
                 this.progressBar1.Maximum = 100;
-                this.progressBar1.Value = Form1.playerData.Life;
+                this.progressBar1.Value = parent.playerData.Life;
             }
             
-            if (Form1.otherPlayerData != null)
+            if (parent.otherPlayerData != null)
             {
-                this.player2.Text = Form1.otherPlayerData.Name;
-                this.pictureBox2.Image = Form1.GetCharacterImage(Form1.otherPlayerData.Character);
+                this.player2.Text = parent.otherPlayerData.Name;
+                this.pictureBox2.Image = parent.GetCharacterImage(parent.otherPlayerData.Character);
                 this.progressBar2.Maximum = 100;
-                this.progressBar2.Value = Form1.otherPlayerData.Life;
+                this.progressBar2.Value = parent.otherPlayerData.Life;
             }
 
             ReDrawGun();
@@ -52,14 +56,14 @@ namespace MultiplayerGame
         
         public void UpdateGame()
         {
-            if (Form1.playerData != null)
+            if (parent.playerData != null)
             {
-                player1InGame.Image = Form1.GetCharacterImage(Form1.playerData.Character);
-                player1InGame.Left = Form1.playerData.X;
-                player1InGame.Top = Form1.playerData.Y;
-                if (Form1.playerData.Life > 0)
+                player1InGame.Image = parent.GetCharacterImage(parent.playerData.Character);
+                player1InGame.Left = parent.playerData.PlayerCoordinate.X;
+                player1InGame.Top = parent.playerData.PlayerCoordinate.Y;
+                if (parent.playerData.Life > 0)
                 {
-                    this.progressBar1.Value = Form1.playerData.Life;
+                    this.progressBar1.Value = parent.playerData.Life;
                 }
                 else
                 {
@@ -70,16 +74,16 @@ namespace MultiplayerGame
                 }
             }
             
-            if (Form1.otherPlayerData != null)
+            if (parent.otherPlayerData != null)
             {
-                player2InGame.Image = Form1.GetCharacterImage(Form1.otherPlayerData.Character);
-                player2InGame.Left = Form1.otherPlayerData.X;
-                player2InGame.Top = Form1.otherPlayerData.Y;
-                this.player2.Text = Form1.otherPlayerData.Name;
-                this.pictureBox2.Image = Form1.GetCharacterImage(Form1.otherPlayerData.Character);
-                if (Form1.otherPlayerData.Life > 0)
+                player2InGame.Image = parent.GetCharacterImage(parent.otherPlayerData.Character);
+                player2InGame.Left = parent.otherPlayerData.PlayerCoordinate.X;
+                player2InGame.Top = parent.otherPlayerData.PlayerCoordinate.Y;
+                this.player2.Text = parent.otherPlayerData.Name;
+                this.pictureBox2.Image = parent.GetCharacterImage(parent.otherPlayerData.Character);
+                if (parent.otherPlayerData.Life > 0)
                 {
-                    this.progressBar2.Value = Form1.otherPlayerData.Life;
+                    this.progressBar2.Value = parent.otherPlayerData.Life;
                 }
                 else
                 {
@@ -95,15 +99,14 @@ namespace MultiplayerGame
         {
             this.angle = 90;
 
-            Form1.playerData = new PlayerData() {
-                Character = Form1.playerData.Character,
-                Name = Form1.playerData.Name
+            parent.playerData = new PlayerData() {
+                Character = parent.playerData.Character,
+                Name = parent.playerData.Name
             };
 
-            Form1.SendData(Form1.playerData);
+            parent.SendData(parent.playerData);
         }
-
-        //TODO: kiszervezni
+        
         private void Game_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.W)
@@ -135,7 +138,7 @@ namespace MultiplayerGame
                 Fire();
             }
 
-            Form1.SendData(Form1.playerData);
+            parent.SendData(parent.playerData);
             ReDrawGun();
             UpdateGame();
         }
@@ -144,54 +147,54 @@ namespace MultiplayerGame
         {
             if (playerMove == PlayerMove.UP)
             {
-                if (0 > Form1.playerData.Y)
+                if (0 > parent.playerData.PlayerCoordinate.Y)
                 {
-                    Form1.playerData.Life = Form1.playerData.Life - Constant.DamageFromTheWall;
+                    parent.playerData.Life = parent.playerData.Life - Constant.DamageFromTheWall;
                 }
                 else
                 {
-                    player1InGame.Top = Form1.playerData.Y - Constant.Step;
-                    Form1.playerData.Y = Form1.playerData.Y - Constant.Step;
-                    Form1.playerData.HintY = Form1.playerData.HintY - Constant.Step;
+                    player1InGame.Top = parent.playerData.PlayerCoordinate.Y - Constant.Step;
+                    parent.playerData.PlayerCoordinate.Y = parent.playerData.PlayerCoordinate.Y - Constant.Step;
+                    parent.playerData.HintCoordinate.Y = parent.playerData.HintCoordinate.Y - Constant.Step;
                 }
             }
             else if (playerMove == PlayerMove.DOWN)
             {
-                if ((Constant.GameAreaSizeY - Constant.PlayerSizeInGame) <= (Form1.playerData.Y + Constant.PlayerSizeInGame))
+                if ((Constant.GameAreaSizeY - Constant.PlayerSizeInGame) <= (parent.playerData.PlayerCoordinate.Y + Constant.PlayerSizeInGame))
                 {
-                    Form1.playerData.Life = Form1.playerData.Life - Constant.DamageFromTheWall;
+                    parent.playerData.Life = parent.playerData.Life - Constant.DamageFromTheWall;
                 }
                 else
                 {
-                    player1InGame.Top = Form1.playerData.Y + Constant.Step;
-                    Form1.playerData.Y = Form1.playerData.Y + Constant.Step;
-                    Form1.playerData.HintY = Form1.playerData.HintY + Constant.Step;
+                    player1InGame.Top = parent.playerData.PlayerCoordinate.Y + Constant.Step;
+                    parent.playerData.PlayerCoordinate.Y = parent.playerData.PlayerCoordinate.Y + Constant.Step;
+                    parent.playerData.HintCoordinate.Y = parent.playerData.HintCoordinate.Y + Constant.Step;
                 }
             }
             else if (playerMove == PlayerMove.LEFT)
             {
-                if (0 > Form1.playerData.X)
+                if (0 > parent.playerData.PlayerCoordinate.X)
                 {
-                    Form1.playerData.Life = Form1.playerData.Life - Constant.DamageFromTheWall;
+                    parent.playerData.Life = parent.playerData.Life - Constant.DamageFromTheWall;
                 }
                 else
                 {
-                    player1InGame.Left = Form1.playerData.X - Constant.Step;
-                    Form1.playerData.X = Form1.playerData.X - Constant.Step;
-                    Form1.playerData.HintX = Form1.playerData.HintX - Constant.Step;
+                    player1InGame.Left = parent.playerData.PlayerCoordinate.X - Constant.Step;
+                    parent.playerData.PlayerCoordinate.X = parent.playerData.PlayerCoordinate.X - Constant.Step;
+                    parent.playerData.HintCoordinate.X = parent.playerData.HintCoordinate.X - Constant.Step;
                 }
             }
             else if (playerMove == PlayerMove.RIGHT)
             {
-                if ((Constant.GameAreaSizeX - Constant.PlayerSizeInGame) <= (Form1.playerData.X + Constant.PlayerSizeInGame))
+                if ((Constant.GameAreaSizeX - Constant.PlayerSizeInGame) <= (parent.playerData.PlayerCoordinate.X + Constant.PlayerSizeInGame))
                 {
-                    Form1.playerData.Life = Form1.playerData.Life - Constant.DamageFromTheWall;
+                    parent.playerData.Life = parent.playerData.Life - Constant.DamageFromTheWall;
                 }
                 else
                 {
-                    player1InGame.Left = Form1.playerData.X + Constant.Step;
-                    Form1.playerData.X = Form1.playerData.X + Constant.Step;
-                    Form1.playerData.HintX = Form1.playerData.HintX + Constant.Step;
+                    player1InGame.Left = parent.playerData.PlayerCoordinate.X + Constant.Step;
+                    parent.playerData.PlayerCoordinate.X = parent.playerData.PlayerCoordinate.X + Constant.Step;
+                    parent.playerData.HintCoordinate.X = parent.playerData.HintCoordinate.X + Constant.Step;
                 }
             }
         }
@@ -200,13 +203,13 @@ namespace MultiplayerGame
         {
             graphics.Clear(this.BackColor);
 
-            if (Form1.playerData != null)
+            if (parent.playerData != null)
             {
-                graphics.DrawLine(pen, Form1.playerData.X + (Constant.PlayerSizeInGame / 2), Form1.playerData.Y + (Constant.PlayerSizeInGame / 2), Form1.playerData.HintX, Form1.playerData.HintY);
+                graphics.DrawLine(pen, parent.playerData.PlayerCoordinate.X + (Constant.PlayerSizeInGame / 2), parent.playerData.PlayerCoordinate.Y + (Constant.PlayerSizeInGame / 2), parent.playerData.HintCoordinate.X, parent.playerData.HintCoordinate.Y);
             }
-            else if (Form1.otherPlayerData != null)
+            else if (parent.otherPlayerData != null)
             {
-                graphics.DrawLine(pen, Form1.otherPlayerData.X - (Constant.PlayerSizeInGame / 2), Form1.otherPlayerData.Y - (Constant.PlayerSizeInGame / 2), Form1.otherPlayerData.HintX, Form1.otherPlayerData.HintY);
+                graphics.DrawLine(pen, parent.otherPlayerData.PlayerCoordinate.X - (Constant.PlayerSizeInGame / 2), parent.otherPlayerData.PlayerCoordinate.Y - (Constant.PlayerSizeInGame / 2), parent.otherPlayerData.HintCoordinate.X, parent.otherPlayerData.HintCoordinate.Y);
             }
         }
 
@@ -224,19 +227,19 @@ namespace MultiplayerGame
             int x = Convert.ToInt32(Math.Round(Math.Cos(((Math.PI / 180) * this.angle)) * Constant.FireRange));
             int y = Convert.ToInt32(Math.Round(Math.Sin(((Math.PI / 180) * this.angle)) * Constant.FireRange));
 
-            Form1.playerData.HintX = (Form1.playerData.X + (Constant.PlayerSizeInGame / 2)) + x;
-            Form1.playerData.HintY = (Form1.playerData.Y + (Constant.PlayerSizeInGame / 2)) + y;
+            parent.playerData.HintCoordinate.X = (parent.playerData.PlayerCoordinate.X + (Constant.PlayerSizeInGame / 2)) + x;
+            parent.playerData.HintCoordinate.Y = (parent.playerData.PlayerCoordinate.Y + (Constant.PlayerSizeInGame / 2)) + y;
         }
 
         private void Fire()
         {
             //ez a négyzet okozza a sebzést
-            var rect = new Rectangle(new Point(Form1.playerData.HintX, Form1.playerData.HintY), new Size(Constant.HalfPlayerSizeInGame, Constant.HalfPlayerSizeInGame));
+            var rect = new Rectangle(new Point(parent.playerData.HintCoordinate.X, parent.playerData.HintCoordinate.Y), new Size(Constant.HalfPlayerSizeInGame, Constant.HalfPlayerSizeInGame));
             graphics.DrawRectangle(pen, rect);
             
             if (player2InGame.Bounds.IntersectsWith(rect))
             {
-                Form1.SendData(new Fire());
+                parent.SendData(new Fire());
             }
         }
     }
