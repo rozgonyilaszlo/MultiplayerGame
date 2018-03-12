@@ -10,6 +10,7 @@ public class AsynchronousClient
     public delegate void Connected();
     public delegate void MessageReceived(string data);
     public delegate void MessageSent();
+    public delegate void ClientDisconnected();
 
     // The port number for the remote device.
     private const int port = 11000;
@@ -24,6 +25,7 @@ public class AsynchronousClient
     public Connected OnConnected { set; get; }
     public MessageReceived OnMessageReceived { get; set; }
     public MessageSent OnMessageSent { set; get; }
+    public ClientDisconnected OnClientDisconnected { get; set; }
 
     /// <summary>
     /// Default constructor
@@ -119,6 +121,9 @@ public class AsynchronousClient
         catch (Exception e)
         {
             Console.WriteLine(e.ToString());
+
+            if (OnClientDisconnected != null)
+                SynchronizationContext.Current.Post(o => OnClientDisconnected(), null);
         }
 
         // Receive more data

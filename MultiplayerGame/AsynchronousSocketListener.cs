@@ -7,7 +7,7 @@ using System.Threading;
 public class AsynchronousSocketListener
 {
     // public delegate functions
-    public delegate void ClientConnected(string client);
+    public delegate void ClientConnected();
     public delegate void ClientDisconnected();
     public delegate void MessageReceived(string message);
     public delegate void MessageSent();
@@ -97,7 +97,7 @@ public class AsynchronousSocketListener
         handler = listener.EndAccept(ar);
 
         if (OnClientConnected != null)
-            SynchronizationContext.Current.Post(o => OnClientConnected(handler.RemoteEndPoint.ToString()), null);
+            SynchronizationContext.Current.Post(o => OnClientConnected(), null);
 
         // start data reception
         handler.BeginReceive(buffer, 0, BufferSize, 0, new AsyncCallback(ReadCallback), null);

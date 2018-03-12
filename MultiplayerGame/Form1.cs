@@ -8,36 +8,27 @@ namespace MultiplayerGame
 {
     public partial class Form1 : Form
     {
-        //TODO: ha a szerver elérhetetlen lesz, valamit kezdeni vele.
-        //NOTE: a küldés elszáll a kliensnél, a szervernél van esemény. ebből kell kiindulni
-        
-        //TODO: névre illetve karakterre egyezést lehetne ellenőrizni
-
-        Game gameForm;
+        private Game gameForm;
         private AsynchronousSocketListener serverSocket;
         private AsynchronousClient asynchronousClient;
-        public GameModeType gameModeType;
-        public PlayerData playerData;
-        public PlayerData otherPlayerData;
+        private GameModeType gameModeType;
+        private int character = 1;
         
         public Form1()
         {
             InitializeComponent();
-
-            playerData = new PlayerData();
             
             startGame.Enabled = false;
 
-            //Server
             serverSocket = new AsynchronousSocketListener();
-            serverSocket.OnClientConnected = OnClientConnected;
+            serverSocket.OnClientConnected = Connected;
             serverSocket.OnClientDisconnected = OnClientDisconnected;
             serverSocket.OnMessageReceived = OnMessageReceived;
-
-            //Client
+            
             asynchronousClient = new AsynchronousClient();
             asynchronousClient.OnConnected = Connected;
             asynchronousClient.OnMessageReceived = OnMessageReceived;
+            asynchronousClient.OnClientDisconnected = OnClientDisconnected;
         }
         
         private void startServer_Click(object sender, EventArgs e)
@@ -59,50 +50,41 @@ namespace MultiplayerGame
             startGame.Enabled = true;
         }
 
-        //TODO: ugyanaz a connected event legyen
-        private void OnClientConnected(string client)
-        {
-            events.Text += "Kapcsolódva.";
-            startGame.Enabled = true;
-        }
-
         private void OnClientDisconnected()
         {
-            events.Text += "Kliens lecsatlakozott.";
+            events.Text += "Szétkapcsolódva.";
+            if (gameForm != null)
+            {
+                gameForm.Close();
+            }
             startGame.Enabled = false;
         }
         
-        //TODO: valamit még kellene kezdeni vele, mert nem túl elegáns, de működik
         private void OnMessageReceived(string message)
         {
-            if (message.Contains("\"Shoted\":true"))
+            try
             {
-                try
+                //TODO: megvalósítani a lövés animációját
+                if (message.Contains("From"))
                 {
                     Fire fire = JsonConvert.DeserializeObject<Fire>(message);
-                    playerData.Life = playerData.Life - Constant.DamageFromFire;
-
-                    SendData(playerData);
-                    gameForm.UpdateGame();
+                    if (gameForm != null)
+                    {
+                        gameForm.Me.Life -= Constant.DamageFromFire;
+                    }
                 }
-                catch (Exception e)
-                {
-                    events.Text += "Exception: " + e.Message;
-                }
-            }
-            else
-            {
-                try
+                else
                 {
                     PlayerData data = JsonConvert.DeserializeObject<PlayerData>(message);
-                    otherPlayerData = data;
-                    gameForm.UpdateGame();
+                    if (gameForm != null)
+                    {
+                        gameForm.Enemy = data;
+                    }
                 }
-                catch (Exception e)
-                {
-                    events.Text += "Exception: " + e.Message;
-                    events.Text += "Message: " + message;
-                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Exception: {0}, Message: {1}", e.Message, message);
             }
         }
         
@@ -123,10 +105,11 @@ namespace MultiplayerGame
         
         private void startGame_Click(object sender, EventArgs e)
         {
-            playerData.Name = textBox1.Text;
-            SendData(playerData);
-
-            gameForm = new Game(parent: this);
+            PlayerData me = new PlayerData();
+            me.Name = textBox1.Text;
+            me.Character = character;
+            
+            gameForm = new Game(parent: this, me: me);
             gameForm.Show();
             
             startGame.Enabled = false;
@@ -150,30 +133,30 @@ namespace MultiplayerGame
         {
             if (((Button)sender).Text == ">")
             {
-                if (playerData.Character < 5)
+                if (character < 5)
                 {
-                    playerData.Character++;
+                    character++;
                 }
                 else
                 {
-                    playerData.Character = 1;
+                    character = 1;
                 }
             }
             else
             {
-                if (playerData.Character <= 1)
+                if (character <= 1)
                 {
-                    playerData.Character = 5;
+                    character = 5;
                 }
                 else
                 {
-                    playerData.Character--;
+                    character--;
                 }
             }
 
-            pictureBox1.Image = GetCharacterImage(playerData.Character);
+            pictureBox1.Image = GetCharacterImage(character);
         }
-
+        
         public Bitmap GetCharacterImage(int id)
         {
             switch (id)

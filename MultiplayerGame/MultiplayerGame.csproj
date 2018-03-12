@@ -70,7 +70,6 @@
     <Compile Include="Models\GameModeType.cs" />
     <Compile Include="Models\PlayerData.cs" />
     <Compile Include="Models\PlayerMove.cs" />
-    <Compile Include="Models\Rotate.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Form1.resx">

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace MultiplayerGame.Models
+﻿namespace MultiplayerGame.Models
 {
     public class Constant
     {
@@ -12,7 +10,9 @@ namespace MultiplayerGame.Models
         public static int DamageFromFire = 10;
         public static int PlayerSizeInGame = 32;
         public static int HalfPlayerSizeInGame = PlayerSizeInGame / 2;
-        public static int FireRange = 100;
-        public static int RotateGrad = 10;
+        public static int FireRange = 25;
+        public static int RotateDegree = 10;
+        public static int FrameRate = 30;
+        public static int StartAngle = 90;
     }
 }

@@ -8,103 +8,137 @@ namespace MultiplayerGame
     public partial class Game : Form
     {
         private Form1 parent;
+        public PlayerData Me;
+        public PlayerData Enemy;
+        private bool isPlayerDataDisplayed;
+        private int myPoint = 0;
+        private int enemyPoint = 0;
 
-        private int myScore = 0;
-        private int enemyScore = 0;
-        private Graphics graphics;
-        private Pen pen;
-        private int angle = 90;
-        
-        public Game(Form1 parent)
+        public Game(Form1 parent, PlayerData me)
         {
             InitializeComponent();
-
+            
             this.parent = parent;
+            this.Me = me;
 
-            //ne lehessen átméretezni az ablakot
+            timer1.Interval = Convert.ToInt32((1.0 / Constant.FrameRate) * 1000);
+            timer1.Start();
+
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-
-            pen = new Pen(Color.FromKnownColor(KnownColor.Red));
-            graphics = this.CreateGraphics();
             
-            if (parent.playerData != null)
+            if (Me != null)
             {
-                this.player1.Text = parent.playerData.Name;
-                this.pictureBox1.Image = parent.GetCharacterImage(parent.playerData.Character);
-                this.progressBar1.Maximum = 100;
-                this.progressBar1.Value = parent.playerData.Life;
+                player1.Text = Me.Name;
+                pictureBox1.Image = parent.GetCharacterImage(Me.Character);
+                progressBar1.Value = Me.Life;
             }
             
-            if (parent.otherPlayerData != null)
+            if (Enemy != null)
             {
-                this.player2.Text = parent.otherPlayerData.Name;
-                this.pictureBox2.Image = parent.GetCharacterImage(parent.otherPlayerData.Character);
-                this.progressBar2.Maximum = 100;
-                this.progressBar2.Value = parent.otherPlayerData.Life;
+                player2.Text = Enemy.Name;
+                pictureBox2.Image = parent.GetCharacterImage(Enemy.Character);
+                progressBar2.Value = Enemy.Life;
             }
-
-            ReDrawGun();
-
-            label1.Text = "Eredmény: " + myScore;
-            label2.Text = "Eredmény: " + enemyScore;
-
+            
             player1.BringToFront();
             player2.BringToFront();
         }
-        
-        public void UpdateGame()
+
+        protected override void OnPaint(PaintEventArgs e)
         {
-            if (parent.playerData != null)
+            //adatok sáv frissítése
+            if (!isPlayerDataDisplayed)
             {
-                player1InGame.Image = parent.GetCharacterImage(parent.playerData.Character);
-                player1InGame.Left = parent.playerData.PlayerCoordinate.X;
-                player1InGame.Top = parent.playerData.PlayerCoordinate.Y;
-                if (parent.playerData.Life > 0)
+                if (Me != null)
                 {
-                    this.progressBar1.Value = parent.playerData.Life;
+                    player1.Text = Me.Name;
+                    pictureBox1.Image = parent.GetCharacterImage(Me.Character);
+                    progressBar1.Value = Me.Life;
                 }
-                else
+                if (Enemy != null)
                 {
-                    MessageBox.Show("Vesztettél.", "Mérközés vége.", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    enemyScore++;
-                    label2.Text = "Eredmény: " + enemyScore;
-                    RestartGame();
+                    player2.Text = Enemy.Name;
+                    pictureBox2.Image = parent.GetCharacterImage(Enemy.Character);
+                    progressBar2.Value = Enemy.Life;
+
+                    isPlayerDataDisplayed = true;
                 }
             }
-            
-            if (parent.otherPlayerData != null)
+            else
             {
-                player2InGame.Image = parent.GetCharacterImage(parent.otherPlayerData.Character);
-                player2InGame.Left = parent.otherPlayerData.PlayerCoordinate.X;
-                player2InGame.Top = parent.otherPlayerData.PlayerCoordinate.Y;
-                this.player2.Text = parent.otherPlayerData.Name;
-                this.pictureBox2.Image = parent.GetCharacterImage(parent.otherPlayerData.Character);
-                if (parent.otherPlayerData.Life > 0)
+                try
                 {
-                    this.progressBar2.Value = parent.otherPlayerData.Life;
+                    //TODO: hibajavítás, csak az egyik oldalt számol. illetve csak az egyik játékosnél kezd új játékot 
+                    if (Me.Life > 0)
+                    {
+                        progressBar1.Value = Me.Life;
+                    }
+                    else
+                    {
+                        enemyPoint++;
+                        enemyScore.Text = enemyPoint.ToString();
+                        RestartGame();
+                    }
+
+                    if (Enemy.Life > 0)
+                    {
+                        progressBar2.Value = Enemy.Life;
+                    }
+                    else
+                    {
+                        myPoint++;
+                        myScore.Text = myPoint.ToString();
+                        RestartGame();
+                    }
                 }
-                else
+                catch (Exception exception)
                 {
-                    MessageBox.Show("Nyertél.", "Mérközés vége.", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    myScore++;
-                    label1.Text = "Eredmény: " + myScore;
-                    RestartGame();
+                    Console.WriteLine("Hiba keletkezett: {0}", exception.Message);
                 }
             }
+
+            //grafika frissítése
+            using (Graphics g = e.Graphics)
+            {
+                Bitmap me = new Bitmap(parent.GetCharacterImage(Me.Character));
+
+                Rectangle meCompression = new Rectangle(Me.PlayerCoordinate.X, Me.PlayerCoordinate.Y,
+                   Constant.PlayerSizeInGame, Constant.PlayerSizeInGame);
+
+                g.DrawImage(me, 10, 10);
+                g.DrawImage(me, meCompression);
+                
+                Point gun = GetTheGunPoint();
+                g.DrawLine(new Pen(Color.Red, 1), Me.PlayerCoordinate.X + Constant.HalfPlayerSizeInGame,
+                    Me.PlayerCoordinate.Y + Constant.HalfPlayerSizeInGame, gun.X, gun.Y);
+
+                if (Enemy != null)
+                {
+                    Bitmap enemy = new Bitmap(parent.GetCharacterImage(Enemy.Character));
+
+                    Rectangle enemyCompression = new Rectangle(Enemy.PlayerCoordinate.X, Enemy.PlayerCoordinate.Y,
+                       Constant.PlayerSizeInGame, Constant.PlayerSizeInGame);
+
+                    g.DrawImage(enemy, 10, 10);
+                    g.DrawImage(enemy, enemyCompression);
+                }
+            }
+
+            parent.SendData(Me);
         }
         
         private void RestartGame()
         {
-            this.angle = 90;
-
-            parent.playerData = new PlayerData() {
-                Character = parent.playerData.Character,
-                Name = parent.playerData.Name
+            timer1.Start();
+            
+            Me = new PlayerData() {
+                Character = Me.Character,
+                Name = Me.Name
             };
 
-            parent.SendData(parent.playerData);
+            parent.SendData(Me);
         }
         
         private void Game_KeyDown(object sender, KeyEventArgs e)
@@ -127,120 +161,85 @@ namespace MultiplayerGame
             }
             else if (e.KeyCode == Keys.K)
             {
-                RotateTheGun(Constant.RotateGrad, Rotate.LEFT);
+                Me.GunAngle += Constant.RotateDegree;
             }
             else if (e.KeyCode == Keys.L)
             {
-                RotateTheGun(Constant.RotateGrad, Rotate.RIGHT);
+                Me.GunAngle -= Constant.RotateDegree;
             }
             else if (e.KeyCode == Keys.Space)
             {
                 Fire();
             }
-
-            parent.SendData(parent.playerData);
-            ReDrawGun();
-            UpdateGame();
         }
 
         private void PlayerMoved(PlayerMove playerMove)
         {
             if (playerMove == PlayerMove.UP)
             {
-                if (0 > parent.playerData.PlayerCoordinate.Y)
+                if (0 > Me.PlayerCoordinate.Y)
                 {
-                    parent.playerData.Life = parent.playerData.Life - Constant.DamageFromTheWall;
+                    Me.Life -= Constant.DamageFromTheWall;
                 }
                 else
                 {
-                    player1InGame.Top = parent.playerData.PlayerCoordinate.Y - Constant.Step;
-                    parent.playerData.PlayerCoordinate.Y = parent.playerData.PlayerCoordinate.Y - Constant.Step;
-                    parent.playerData.HintCoordinate.Y = parent.playerData.HintCoordinate.Y - Constant.Step;
+                    Me.PlayerCoordinate.Y -= Constant.Step;
                 }
             }
             else if (playerMove == PlayerMove.DOWN)
             {
-                if ((Constant.GameAreaSizeY - Constant.PlayerSizeInGame) <= (parent.playerData.PlayerCoordinate.Y + Constant.PlayerSizeInGame))
+                if ((Constant.GameAreaSizeY - Constant.PlayerSizeInGame) <= (Me.PlayerCoordinate.Y + Constant.PlayerSizeInGame))
                 {
-                    parent.playerData.Life = parent.playerData.Life - Constant.DamageFromTheWall;
+                    Me.Life -= Constant.DamageFromTheWall;
                 }
                 else
                 {
-                    player1InGame.Top = parent.playerData.PlayerCoordinate.Y + Constant.Step;
-                    parent.playerData.PlayerCoordinate.Y = parent.playerData.PlayerCoordinate.Y + Constant.Step;
-                    parent.playerData.HintCoordinate.Y = parent.playerData.HintCoordinate.Y + Constant.Step;
+                    Me.PlayerCoordinate.Y += Constant.Step;
                 }
             }
             else if (playerMove == PlayerMove.LEFT)
             {
-                if (0 > parent.playerData.PlayerCoordinate.X)
+                if (0 > Me.PlayerCoordinate.X)
                 {
-                    parent.playerData.Life = parent.playerData.Life - Constant.DamageFromTheWall;
+                    Me.Life -= Constant.DamageFromTheWall;
                 }
                 else
                 {
-                    player1InGame.Left = parent.playerData.PlayerCoordinate.X - Constant.Step;
-                    parent.playerData.PlayerCoordinate.X = parent.playerData.PlayerCoordinate.X - Constant.Step;
-                    parent.playerData.HintCoordinate.X = parent.playerData.HintCoordinate.X - Constant.Step;
+                    Me.PlayerCoordinate.X -= Constant.Step;
                 }
             }
             else if (playerMove == PlayerMove.RIGHT)
             {
-                if ((Constant.GameAreaSizeX - Constant.PlayerSizeInGame) <= (parent.playerData.PlayerCoordinate.X + Constant.PlayerSizeInGame))
+                if ((Constant.GameAreaSizeX - Constant.PlayerSizeInGame) <= (Me.PlayerCoordinate.X + Constant.PlayerSizeInGame))
                 {
-                    parent.playerData.Life = parent.playerData.Life - Constant.DamageFromTheWall;
+                    Me.Life -= Constant.DamageFromTheWall;
                 }
                 else
                 {
-                    player1InGame.Left = parent.playerData.PlayerCoordinate.X + Constant.Step;
-                    parent.playerData.PlayerCoordinate.X = parent.playerData.PlayerCoordinate.X + Constant.Step;
-                    parent.playerData.HintCoordinate.X = parent.playerData.HintCoordinate.X + Constant.Step;
+                    Me.PlayerCoordinate.X += Constant.Step;
                 }
             }
         }
 
-        private void ReDrawGun()
+        private Point GetTheGunPoint()
         {
-            graphics.Clear(this.BackColor);
-
-            if (parent.playerData != null)
-            {
-                graphics.DrawLine(pen, parent.playerData.PlayerCoordinate.X + (Constant.PlayerSizeInGame / 2), parent.playerData.PlayerCoordinate.Y + (Constant.PlayerSizeInGame / 2), parent.playerData.HintCoordinate.X, parent.playerData.HintCoordinate.Y);
-            }
-            else if (parent.otherPlayerData != null)
-            {
-                graphics.DrawLine(pen, parent.otherPlayerData.PlayerCoordinate.X - (Constant.PlayerSizeInGame / 2), parent.otherPlayerData.PlayerCoordinate.Y - (Constant.PlayerSizeInGame / 2), parent.otherPlayerData.HintCoordinate.X, parent.otherPlayerData.HintCoordinate.Y);
-            }
-        }
-
-        private void RotateTheGun(int angle, Rotate rotate)
-        {
-            if (rotate == Rotate.LEFT)
-            {
-                this.angle -= angle;
-            }
-            else if (rotate == Rotate.RIGHT)
-            {
-                this.angle += angle;
-            }
-
-            int x = Convert.ToInt32(Math.Round(Math.Cos(((Math.PI / 180) * this.angle)) * Constant.FireRange));
-            int y = Convert.ToInt32(Math.Round(Math.Sin(((Math.PI / 180) * this.angle)) * Constant.FireRange));
-
-            parent.playerData.HintCoordinate.X = (parent.playerData.PlayerCoordinate.X + (Constant.PlayerSizeInGame / 2)) + x;
-            parent.playerData.HintCoordinate.Y = (parent.playerData.PlayerCoordinate.Y + (Constant.PlayerSizeInGame / 2)) + y;
+            int x = Convert.ToInt32(Math.Round(Math.Cos(((Math.PI / 180) * Me.GunAngle)) * Constant.FireRange));
+            int y = Convert.ToInt32(Math.Round(Math.Sin(((Math.PI / 180) * Me.GunAngle)) * Constant.FireRange));
+            
+            return new Point((Me.PlayerCoordinate.X + Constant.HalfPlayerSizeInGame) + x, (Me.PlayerCoordinate.Y + Constant.HalfPlayerSizeInGame) + y);
         }
 
         private void Fire()
         {
-            //ez a négyzet okozza a sebzést
-            var rect = new Rectangle(new Point(parent.playerData.HintCoordinate.X, parent.playerData.HintCoordinate.Y), new Size(Constant.HalfPlayerSizeInGame, Constant.HalfPlayerSizeInGame));
-            graphics.DrawRectangle(pen, rect);
-            
-            if (player2InGame.Bounds.IntersectsWith(rect))
-            {
-                parent.SendData(new Fire());
-            }
+            parent.SendData(new Fire() {
+                From = Me.PlayerCoordinate,
+                Angle = Me.GunAngle
+            });
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            this.Invalidate();
         }
     }
 }
