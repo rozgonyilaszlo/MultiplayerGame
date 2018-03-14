@@ -64,9 +64,9 @@
     <Compile Include="Game.Designer.cs">
       <DependentUpon>Game.cs</DependentUpon>
     </Compile>
+    <Compile Include="Models\Bullet.cs" />
     <Compile Include="Models\Constant.cs" />
     <Compile Include="Models\Coordinate.cs" />
-    <Compile Include="Models\Fire.cs" />
     <Compile Include="Models\GameModeType.cs" />
     <Compile Include="Models\PlayerData.cs" />
     <Compile Include="Models\PlayerMove.cs" />
@@ -116,6 +116,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\player5.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\bullet.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

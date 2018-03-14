@@ -114,6 +114,30 @@ namespace MultiplayerGame
                 g.DrawLine(new Pen(Color.Red, 1), Me.PlayerCoordinate.X + Constant.HalfPlayerSizeInGame,
                     Me.PlayerCoordinate.Y + Constant.HalfPlayerSizeInGame, gun.X, gun.Y);
 
+                //lövések rajzolása
+                if (Me.Bullets.Count > 0)
+                {
+                    try
+                    {
+                        foreach (var bullet in Me.Bullets)
+                        {
+                            if (bullet.IsValid)
+                            {
+                                g.DrawImage(Properties.Resources.bullet, bullet.GetPoint());
+                                bullet.RaiseRange();
+                            }
+                            else
+                            {
+                                Me.Bullets.Remove(bullet);
+                            }
+                        }
+                    }
+                    catch (Exception exp)
+                    {
+                        Console.WriteLine(exp.Message);
+                    }
+                }
+
                 if (Enemy != null)
                 {
                     Bitmap enemy = new Bitmap(parent.GetCharacterImage(Enemy.Character));
@@ -123,6 +147,19 @@ namespace MultiplayerGame
 
                     g.DrawImage(enemy, 10, 10);
                     g.DrawImage(enemy, enemyCompression);
+
+                    //lövések rajzolása
+                    if (Enemy.Bullets.Count > 0)
+                    {
+                        foreach (var bullet in Enemy.Bullets)
+                        {
+                            if (bullet.IsValid)
+                            {
+                                g.DrawImage(Properties.Resources.bullet, bullet.GetPoint());
+                                bullet.RaiseRange();
+                            }
+                        }
+                    }
                 }
             }
 
@@ -231,8 +268,8 @@ namespace MultiplayerGame
 
         private void Fire()
         {
-            parent.SendData(new Fire() {
-                From = Me.PlayerCoordinate,
+            Me.Bullets.Add(new Bullet() {
+                StartPoint = Me.PlayerCoordinate,
                 Angle = Me.GunAngle
             });
         }

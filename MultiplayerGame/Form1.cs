@@ -64,22 +64,10 @@ namespace MultiplayerGame
         {
             try
             {
-                //TODO: megvalósítani a lövés animációját
-                if (message.Contains("From"))
+                PlayerData data = JsonConvert.DeserializeObject<PlayerData>(message);
+                if (gameForm != null)
                 {
-                    Fire fire = JsonConvert.DeserializeObject<Fire>(message);
-                    if (gameForm != null)
-                    {
-                        gameForm.Me.Life -= Constant.DamageFromFire;
-                    }
-                }
-                else
-                {
-                    PlayerData data = JsonConvert.DeserializeObject<PlayerData>(message);
-                    if (gameForm != null)
-                    {
-                        gameForm.Enemy = data;
-                    }
+                    gameForm.Enemy = data;
                 }
             }
             catch (Exception e)
