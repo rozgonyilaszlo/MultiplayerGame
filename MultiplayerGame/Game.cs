@@ -70,7 +70,6 @@ namespace MultiplayerGame
             {
                 try
                 {
-                    //TODO: hibajavítás, csak az egyik oldalt számol. illetve csak az egyik játékosnél kezd új játékot 
                     if (Me.Life > 0)
                     {
                         progressBar1.Value = Me.Life;
@@ -105,7 +104,7 @@ namespace MultiplayerGame
                 Bitmap me = new Bitmap(parent.GetCharacterImage(Me.Character));
 
                 Rectangle meCompression = new Rectangle(Me.PlayerCoordinate.X, Me.PlayerCoordinate.Y,
-                   Constant.PlayerSizeInGame, Constant.PlayerSizeInGame);
+                   Constant.PlayerSize, Constant.PlayerSize);
 
                 g.DrawImage(me, 10, 10);
                 g.DrawImage(me, meCompression);
@@ -143,7 +142,7 @@ namespace MultiplayerGame
                     Bitmap enemy = new Bitmap(parent.GetCharacterImage(Enemy.Character));
 
                     Rectangle enemyCompression = new Rectangle(Enemy.PlayerCoordinate.X, Enemy.PlayerCoordinate.Y,
-                       Constant.PlayerSizeInGame, Constant.PlayerSizeInGame);
+                       Constant.PlayerSize, Constant.PlayerSize);
 
                     g.DrawImage(enemy, 10, 10);
                     g.DrawImage(enemy, enemyCompression);
@@ -163,7 +162,7 @@ namespace MultiplayerGame
                                 //megnézi, hogy a közelbe van-e
                                 if (Me.PlayerCoordinate.IsNear((Coordinate)bulletPoint))
                                 {
-                                    Me.Life -= Constant.DamageFromFire;
+                                    Me.Life -= Constant.DamageFromGun;
                                     bullet.InValidate();
                                 }
                             }
@@ -236,7 +235,7 @@ namespace MultiplayerGame
             }
             else if (playerMove == PlayerMove.DOWN)
             {
-                if ((Constant.GameAreaSizeY - Constant.PlayerSizeInGame) <= (Me.PlayerCoordinate.Y + Constant.PlayerSizeInGame))
+                if ((Constant.GameAreaSizeY - Constant.PlayerSize) <= (Me.PlayerCoordinate.Y + Constant.PlayerSize))
                 {
                     Me.Life -= Constant.DamageFromTheWall;
                 }
@@ -258,7 +257,7 @@ namespace MultiplayerGame
             }
             else if (playerMove == PlayerMove.RIGHT)
             {
-                if ((Constant.GameAreaSizeX - Constant.PlayerSizeInGame) <= (Me.PlayerCoordinate.X + Constant.PlayerSizeInGame))
+                if ((Constant.GameAreaSizeX - Constant.PlayerSize) <= (Me.PlayerCoordinate.X + Constant.PlayerSize))
                 {
                     Me.Life -= Constant.DamageFromTheWall;
                 }

@@ -20,10 +20,14 @@ namespace MultiplayerGame.Models
             this.IsValid = true;
         }
 
+        public override string ToString()
+        {
+            return String.Format("Bullet with StartPoint: {0}, Range: {1}, Angle: {2}, IsValid: {3}", this.StartPoint, this.Range, this.Angle, this.IsValid);
+        }
+
         public void RaiseRange()
         {
-            //TODO: konstansba kivezetni
-            this.Range += 10;
+            this.Range += Constant.RaiseRange;
 
             this.CheckValidity();
         }

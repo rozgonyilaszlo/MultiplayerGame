@@ -28,8 +28,8 @@ namespace MultiplayerGame.Models
             this.Bullets = new List<Bullet>();
 
             Random random = new Random();
-            this.PlayerCoordinate = new Coordinate(random.Next(0, (Constant.GameAreaSizeX - Constant.PlayerSizeInGame)),
-                random.Next(100, (Constant.GameAreaSizeY - Constant.PlayerSizeInGame)));
+            this.PlayerCoordinate = new Coordinate(random.Next(0, (Constant.GameAreaSizeX - Constant.PlayerSize)),
+                random.Next(100, (Constant.GameAreaSizeY - Constant.PlayerSize)));
         }
 
         public override string ToString()
