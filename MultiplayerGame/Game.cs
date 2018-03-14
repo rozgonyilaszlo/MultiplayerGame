@@ -147,19 +147,30 @@ namespace MultiplayerGame
 
                     g.DrawImage(enemy, 10, 10);
                     g.DrawImage(enemy, enemyCompression);
-
-                    //lövések rajzolása
+                    
                     if (Enemy.Bullets.Count > 0)
                     {
                         foreach (var bullet in Enemy.Bullets)
                         {
                             if (bullet.IsValid)
                             {
-                                g.DrawImage(Properties.Resources.bullet, bullet.GetPoint());
+                                Point bulletPoint = bullet.GetPoint();
+
+                                //lövések rajzolása
+                                g.DrawImage(Properties.Resources.bullet, bulletPoint);
                                 bullet.RaiseRange();
+
+                                //megnézi, hogy a közelbe van-e
+                                if (Me.PlayerCoordinate.IsNear((Coordinate)bulletPoint))
+                                {
+                                    Me.Life -= Constant.DamageFromFire;
+                                    bullet.InValidate();
+                                }
                             }
                         }
                     }
+
+                    
                 }
             }
 
