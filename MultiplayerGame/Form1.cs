@@ -31,6 +31,7 @@ namespace MultiplayerGame
             asynchronousClient.OnClientDisconnected = OnClientDisconnected;
         }
         
+        //Start server.
         private void startServer_Click(object sender, EventArgs e)
         {
             gameModeType = GameModeType.SERVER;
@@ -44,12 +45,18 @@ namespace MultiplayerGame
             events.Text += "Szerver elindítva az alábbi címen: " + serverSocket.LocalAddress.ToString();
         }
 
+        /// <summary>
+        /// Callback when connected.
+        /// </summary>
         private void Connected()
         {
             events.Text += "Kapcsolódva.";
             startGame.Enabled = true;
         }
 
+        /// <summary>
+        /// Callback when disconnected.
+        /// </summary>
         private void OnClientDisconnected()
         {
             events.Text += "Szétkapcsolódva.";
@@ -59,7 +66,11 @@ namespace MultiplayerGame
             }
             startGame.Enabled = false;
         }
-        
+
+        /// <summary>
+        /// Callback when message is received.
+        /// </summary>
+        /// <param name="message"></param>
         private void OnMessageReceived(string message)
         {
             try
@@ -76,6 +87,7 @@ namespace MultiplayerGame
             }
         }
         
+        //Connect to server.
         private void connectToServer_Click(object sender, EventArgs e)
         {
             try
@@ -91,6 +103,7 @@ namespace MultiplayerGame
             }
         }
         
+        //Start game.
         private void startGame_Click(object sender, EventArgs e)
         {
             PlayerData me = new PlayerData();
@@ -103,6 +116,10 @@ namespace MultiplayerGame
             startGame.Enabled = false;
         }
 
+        /// <summary>
+        /// Send .NET object.
+        /// </summary>
+        /// <param name="object">.NET object</param>
         public void SendData(object @object)
         {
             string serializedObject = JsonConvert.SerializeObject(@object);
@@ -116,7 +133,8 @@ namespace MultiplayerGame
                 serverSocket.Send(serializedObject);
             }
         }
-
+        
+        // Select character image.
         private void button1_Click(object sender, EventArgs e)
         {
             if (((Button)sender).Text == ">")
@@ -144,7 +162,12 @@ namespace MultiplayerGame
 
             pictureBox1.Image = GetCharacterImage(character);
         }
-        
+
+        /// <summary>
+        /// Get character image from id.
+        /// </summary>
+        /// <param name="id">Character id.</param>
+        /// <returns>Returns the character image.</returns>
         public Bitmap GetCharacterImage(int id)
         {
             switch (id)

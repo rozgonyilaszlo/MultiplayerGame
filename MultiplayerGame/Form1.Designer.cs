@@ -73,7 +73,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(6, 61);
+            this.label2.Location = new System.Drawing.Point(6, 49);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(107, 13);
             this.label2.TabIndex = 2;
@@ -81,7 +81,7 @@
             // 
             // addressTextBox
             // 
-            this.addressTextBox.Location = new System.Drawing.Point(98, 90);
+            this.addressTextBox.Location = new System.Drawing.Point(98, 68);
             this.addressTextBox.Name = "addressTextBox";
             this.addressTextBox.Size = new System.Drawing.Size(119, 20);
             this.addressTextBox.TabIndex = 3;
@@ -89,7 +89,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(6, 90);
+            this.label3.Location = new System.Drawing.Point(6, 71);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(86, 13);
             this.label3.TabIndex = 4;
@@ -97,7 +97,7 @@
             // 
             // connectToServer
             // 
-            this.connectToServer.Location = new System.Drawing.Point(98, 116);
+            this.connectToServer.Location = new System.Drawing.Point(98, 94);
             this.connectToServer.Name = "connectToServer";
             this.connectToServer.Size = new System.Drawing.Size(119, 23);
             this.connectToServer.TabIndex = 5;
@@ -107,16 +107,16 @@
             // 
             // events
             // 
-            this.events.Location = new System.Drawing.Point(12, 170);
+            this.events.Location = new System.Drawing.Point(9, 141);
             this.events.Multiline = true;
             this.events.Name = "events";
-            this.events.Size = new System.Drawing.Size(205, 165);
+            this.events.Size = new System.Drawing.Size(208, 74);
             this.events.TabIndex = 6;
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(6, 151);
+            this.label4.Location = new System.Drawing.Point(6, 125);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(65, 13);
             this.label4.TabIndex = 7;
@@ -132,7 +132,7 @@
             // 
             // startGame
             // 
-            this.startGame.Location = new System.Drawing.Point(244, 314);
+            this.startGame.Location = new System.Drawing.Point(246, 205);
             this.startGame.Name = "startGame";
             this.startGame.Size = new System.Drawing.Size(205, 33);
             this.startGame.TabIndex = 9;
@@ -152,7 +152,7 @@
             this.groupBox1.Controls.Add(this.connectToServer);
             this.groupBox1.Location = new System.Drawing.Point(12, 12);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(226, 341);
+            this.groupBox1.Size = new System.Drawing.Size(226, 226);
             this.groupBox1.TabIndex = 10;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Játék beállítások";
@@ -166,7 +166,7 @@
             this.groupBox2.Controls.Add(this.textBox1);
             this.groupBox2.Location = new System.Drawing.Point(245, 13);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(204, 295);
+            this.groupBox2.Size = new System.Drawing.Size(204, 186);
             this.groupBox2.TabIndex = 11;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Profil";
@@ -220,7 +220,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(463, 359);
+            this.ClientSize = new System.Drawing.Size(458, 246);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.startGame);

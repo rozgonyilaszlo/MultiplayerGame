@@ -7,9 +7,9 @@ namespace MultiplayerGame
 {
     public partial class Game : Form
     {
-        private Form1 parent;
         public PlayerData Me;
         public PlayerData Enemy;
+        private Form1 parent;
         private bool isPlayerDataDisplayed;
         private int myPoint = 0;
         private int enemyPoint = 0;
@@ -46,9 +46,10 @@ namespace MultiplayerGame
             player2.BringToFront();
         }
 
+        //Draw the game.
         protected override void OnPaint(PaintEventArgs e)
         {
-            //adatok sáv frissítése
+            //update data bar
             if (!isPlayerDataDisplayed)
             {
                 if (Me != null)
@@ -98,7 +99,7 @@ namespace MultiplayerGame
                 }
             }
 
-            //grafika frissítése
+            //update graphics
             using (Graphics g = e.Graphics)
             {
                 Bitmap me = new Bitmap(parent.GetCharacterImage(Me.Character));
@@ -113,7 +114,7 @@ namespace MultiplayerGame
                 g.DrawLine(new Pen(Color.Red, 1), Me.PlayerCoordinate.X + Constant.HalfPlayerSizeInGame,
                     Me.PlayerCoordinate.Y + Constant.HalfPlayerSizeInGame, gun.X, gun.Y);
 
-                //lövések rajzolása
+                //draw bullets
                 if (Me.Bullets.Count > 0)
                 {
                     try
@@ -155,11 +156,11 @@ namespace MultiplayerGame
                             {
                                 Point bulletPoint = bullet.GetPoint();
 
-                                //lövések rajzolása
+                                //draw bullets
                                 g.DrawImage(Properties.Resources.bullet, bulletPoint);
                                 bullet.RaiseRange();
 
-                                //megnézi, hogy a közelbe van-e
+                                //check that the bullet is close
                                 if (Me.PlayerCoordinate.IsNear((Coordinate)bulletPoint))
                                 {
                                     Me.Life -= Constant.DamageFromGun;
@@ -176,6 +177,9 @@ namespace MultiplayerGame
             parent.SendData(Me);
         }
         
+        /// <summary>
+        /// Restart the game.
+        /// </summary>
         private void RestartGame()
         {
             timer1.Start();
@@ -216,10 +220,11 @@ namespace MultiplayerGame
             }
             else if (e.KeyCode == Keys.Space)
             {
-                Fire();
+                Shot();
             }
         }
 
+        //Move the player.
         private void PlayerMoved(PlayerMove playerMove)
         {
             if (playerMove == PlayerMove.UP)
@@ -268,6 +273,10 @@ namespace MultiplayerGame
             }
         }
 
+        /// <summary>
+        /// Get the gun point.
+        /// </summary>
+        /// <returns>Returns with the point where the gun points.</returns>
         private Point GetTheGunPoint()
         {
             int x = Convert.ToInt32(Math.Round(Math.Cos(((Math.PI / 180) * Me.GunAngle)) * Constant.FireRange));
@@ -276,7 +285,10 @@ namespace MultiplayerGame
             return new Point((Me.PlayerCoordinate.X + Constant.HalfPlayerSizeInGame) + x, (Me.PlayerCoordinate.Y + Constant.HalfPlayerSizeInGame) + y);
         }
 
-        private void Fire()
+        /// <summary>
+        /// Shot with the gun.
+        /// </summary>
+        private void Shot()
         {
             Me.Bullets.Add(new Bullet() {
                 StartPoint = Me.PlayerCoordinate,
@@ -284,6 +296,7 @@ namespace MultiplayerGame
             });
         }
 
+        //Invalidate the form to redraw.
         private void timer1_Tick(object sender, EventArgs e)
         {
             this.Invalidate();
