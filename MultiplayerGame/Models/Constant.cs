@@ -63,8 +63,8 @@
         public static int StartAngle = 90;
 
         /// <summary>
-        /// Raise bullet range.
+        /// Raise bullet distance.
         /// </summary>
-        public static int RaiseRange = 10;
+        public static int IncreaseDistance = 10;
     }
 }

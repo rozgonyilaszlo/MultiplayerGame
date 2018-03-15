@@ -110,7 +110,7 @@ namespace MultiplayerGame
                 g.DrawImage(me, 10, 10);
                 g.DrawImage(me, meCompression);
                 
-                Point gun = GetTheGunPoint();
+                Point gun = Me.GetTheGunPoint();
                 g.DrawLine(new Pen(Color.Red, 1), Me.PlayerCoordinate.X + Constant.HalfPlayerSizeInGame,
                     Me.PlayerCoordinate.Y + Constant.HalfPlayerSizeInGame, gun.X, gun.Y);
 
@@ -124,7 +124,7 @@ namespace MultiplayerGame
                             if (bullet.IsValid)
                             {
                                 g.DrawImage(Properties.Resources.bullet, bullet.GetPoint());
-                                bullet.RaiseRange();
+                                bullet.IncreaseDistance();
                             }
                             else
                             {
@@ -158,7 +158,7 @@ namespace MultiplayerGame
 
                                 //draw bullets
                                 g.DrawImage(Properties.Resources.bullet, bulletPoint);
-                                bullet.RaiseRange();
+                                bullet.IncreaseDistance();
 
                                 //check that the bullet is close
                                 if (Me.PlayerCoordinate.IsNear((Coordinate)bulletPoint))
@@ -271,18 +271,6 @@ namespace MultiplayerGame
                     Me.PlayerCoordinate.X += Constant.Step;
                 }
             }
-        }
-
-        /// <summary>
-        /// Get the gun point.
-        /// </summary>
-        /// <returns>Returns with the point where the gun points.</returns>
-        private Point GetTheGunPoint()
-        {
-            int x = Convert.ToInt32(Math.Round(Math.Cos(((Math.PI / 180) * Me.GunAngle)) * Constant.FireRange));
-            int y = Convert.ToInt32(Math.Round(Math.Sin(((Math.PI / 180) * Me.GunAngle)) * Constant.FireRange));
-            
-            return new Point((Me.PlayerCoordinate.X + Constant.HalfPlayerSizeInGame) + x, (Me.PlayerCoordinate.Y + Constant.HalfPlayerSizeInGame) + y);
         }
 
         /// <summary>

@@ -9,6 +9,11 @@ namespace MultiplayerGame.Models
 
         public int Y { get; set; }
 
+        /// <summary>
+        /// Default constructor
+        /// </summary>
+        /// <param name="X"></param>
+        /// <param name="Y"></param>
         public Coordinate(int X, int Y)
         {
             this.X = X;
@@ -30,6 +35,11 @@ namespace MultiplayerGame.Models
             return new Point(v.X, v.Y);
         }
 
+        /// <summary>
+        /// Check the two points distance.
+        /// </summary>
+        /// <param name="coordinate">Other coordinates.</param>
+        /// <returns>Returns true if the two coordinates are close together.</returns>
         internal bool IsNear(Coordinate coordinate)
         {
             int distance = (int)Math.Sqrt(Math.Pow(Math.Abs(this.X - coordinate.X), 2) + Math.Pow(Math.Abs(this.Y - coordinate.Y), 2));
