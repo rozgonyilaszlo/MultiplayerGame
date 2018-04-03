@@ -17,7 +17,9 @@ namespace MultiplayerGame
         public Game(Form1 parent, PlayerData me)
         {
             InitializeComponent();
-            
+
+            DoubleBuffered = true;
+
             this.parent = parent;
             this.Me = me;
 
@@ -27,21 +29,21 @@ namespace MultiplayerGame
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            
+
             if (Me != null)
             {
                 player1.Text = Me.Name;
                 pictureBox1.Image = parent.GetCharacterImage(Me.Character);
                 progressBar1.Value = Me.Life;
             }
-            
+
             if (Enemy != null)
             {
                 player2.Text = Enemy.Name;
                 pictureBox2.Image = parent.GetCharacterImage(Enemy.Character);
                 progressBar2.Value = Enemy.Life;
             }
-            
+
             player1.BringToFront();
             player2.BringToFront();
         }
@@ -100,98 +102,98 @@ namespace MultiplayerGame
             }
 
             //update graphics
-            using (Graphics g = e.Graphics)
-            {
-                Bitmap me = new Bitmap(parent.GetCharacterImage(Me.Character));
+            Graphics g = e.Graphics;
 
-                Rectangle meCompression = new Rectangle(Me.PlayerCoordinate.X, Me.PlayerCoordinate.Y,
+            Bitmap me = new Bitmap(parent.GetCharacterImage(Me.Character));
+
+            Rectangle meCompression = new Rectangle(Me.PlayerCoordinate.X, Me.PlayerCoordinate.Y,
+               Constant.PlayerSize, Constant.PlayerSize);
+
+            g.DrawImage(me, 10, 10);
+            g.DrawImage(me, meCompression);
+
+            Point gun = Me.GetTheGunPoint();
+            g.DrawLine(new Pen(Color.Red, 1), Me.PlayerCoordinate.X + Constant.HalfPlayerSizeInGame,
+                Me.PlayerCoordinate.Y + Constant.HalfPlayerSizeInGame, gun.X, gun.Y);
+
+            //draw bullets
+            if (Me.Bullets.Count > 0)
+            {
+                try
+                {
+                    foreach (var bullet in Me.Bullets)
+                    {
+                        if (bullet.IsValid)
+                        {
+                            g.DrawImage(Properties.Resources.bullet, bullet.GetPoint());
+                            bullet.IncreaseDistance();
+                        }
+                        else
+                        {
+                            Me.Bullets.Remove(bullet);
+                        }
+                    }
+                }
+                catch (Exception exp)
+                {
+                    Console.WriteLine(exp.Message);
+                }
+            }
+
+            if (Enemy != null)
+            {
+                Bitmap enemy = new Bitmap(parent.GetCharacterImage(Enemy.Character));
+
+                Rectangle enemyCompression = new Rectangle(Enemy.PlayerCoordinate.X, Enemy.PlayerCoordinate.Y,
                    Constant.PlayerSize, Constant.PlayerSize);
 
-                g.DrawImage(me, 10, 10);
-                g.DrawImage(me, meCompression);
-                
-                Point gun = Me.GetTheGunPoint();
-                g.DrawLine(new Pen(Color.Red, 1), Me.PlayerCoordinate.X + Constant.HalfPlayerSizeInGame,
-                    Me.PlayerCoordinate.Y + Constant.HalfPlayerSizeInGame, gun.X, gun.Y);
+                g.DrawImage(enemy, 10, 10);
+                g.DrawImage(enemy, enemyCompression);
 
-                //draw bullets
-                if (Me.Bullets.Count > 0)
+                if (Enemy.Bullets.Count > 0)
                 {
-                    try
+                    foreach (var bullet in Enemy.Bullets)
                     {
-                        foreach (var bullet in Me.Bullets)
+                        if (bullet.IsValid)
                         {
-                            if (bullet.IsValid)
+                            Point bulletPoint = bullet.GetPoint();
+
+                            //draw bullets
+                            g.DrawImage(Properties.Resources.bullet, bulletPoint);
+                            bullet.IncreaseDistance();
+
+                            //check that the bullet is close
+                            if (Me.PlayerCoordinate.IsNear((Coordinate)bulletPoint))
                             {
-                                g.DrawImage(Properties.Resources.bullet, bullet.GetPoint());
-                                bullet.IncreaseDistance();
-                            }
-                            else
-                            {
-                                Me.Bullets.Remove(bullet);
+                                Me.Life -= Constant.DamageFromGun;
+                                bullet.InValidate();
                             }
                         }
                     }
-                    catch (Exception exp)
-                    {
-                        Console.WriteLine(exp.Message);
-                    }
                 }
 
-                if (Enemy != null)
-                {
-                    Bitmap enemy = new Bitmap(parent.GetCharacterImage(Enemy.Character));
 
-                    Rectangle enemyCompression = new Rectangle(Enemy.PlayerCoordinate.X, Enemy.PlayerCoordinate.Y,
-                       Constant.PlayerSize, Constant.PlayerSize);
-
-                    g.DrawImage(enemy, 10, 10);
-                    g.DrawImage(enemy, enemyCompression);
-                    
-                    if (Enemy.Bullets.Count > 0)
-                    {
-                        foreach (var bullet in Enemy.Bullets)
-                        {
-                            if (bullet.IsValid)
-                            {
-                                Point bulletPoint = bullet.GetPoint();
-
-                                //draw bullets
-                                g.DrawImage(Properties.Resources.bullet, bulletPoint);
-                                bullet.IncreaseDistance();
-
-                                //check that the bullet is close
-                                if (Me.PlayerCoordinate.IsNear((Coordinate)bulletPoint))
-                                {
-                                    Me.Life -= Constant.DamageFromGun;
-                                    bullet.InValidate();
-                                }
-                            }
-                        }
-                    }
-
-                    
-                }
             }
 
             parent.SendData(Me);
         }
-        
+
         /// <summary>
         /// Restart the game.
         /// </summary>
         private void RestartGame()
         {
             timer1.Start();
-            
-            Me = new PlayerData() {
+
+            Me = new PlayerData()
+            {
                 Character = Me.Character,
                 Name = Me.Name
             };
 
             parent.SendData(Me);
         }
-        
+
         private void Game_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.W)
@@ -278,7 +280,8 @@ namespace MultiplayerGame
         /// </summary>
         private void Shot()
         {
-            Me.Bullets.Add(new Bullet() {
+            Me.Bullets.Add(new Bullet()
+            {
                 StartPoint = Me.PlayerCoordinate,
                 Angle = Me.GunAngle
             });
