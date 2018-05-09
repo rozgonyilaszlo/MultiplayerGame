@@ -3,6 +3,9 @@ using System.Drawing;
 using System.Windows.Forms;
 using MultiplayerGame.Models;
 using Newtonsoft.Json;
+using System.Collections;
+using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 
 namespace MultiplayerGame
 {
@@ -13,11 +16,14 @@ namespace MultiplayerGame
         private AsynchronousClient asynchronousClient;
         private GameModeType gameModeType;
         private int character = 1;
+        private Queue<string> queue;
+        private string messages;
         
         public Form1()
         {
             InitializeComponent();
-            
+
+            queue = new Queue<string>();
             startGame.Enabled = false;
 
             serverSocket = new AsynchronousSocketListener();
@@ -73,12 +79,26 @@ namespace MultiplayerGame
         /// <param name="message"></param>
         private void OnMessageReceived(string message)
         {
+            messages += message;
+
+            int index = messages.IndexOf(']');
+
+            string serializableData = messages.Substring(0, index + 2);
+            messages = messages.Substring(index + 2);
+
+            queue.Enqueue(serializableData);
+
             try
             {
-                PlayerData data = JsonConvert.DeserializeObject<PlayerData>(message);
-                if (gameForm != null)
+                Console.WriteLine(queue.Count);
+
+                if (queue.Count > 0)
                 {
-                    gameForm.Enemy = data;
+                    PlayerData data = JsonConvert.DeserializeObject<PlayerData>(queue.Dequeue());
+                    if (gameForm != null)
+                    {
+                        gameForm.Enemy = data;
+                    }
                 }
             }
             catch (Exception e)

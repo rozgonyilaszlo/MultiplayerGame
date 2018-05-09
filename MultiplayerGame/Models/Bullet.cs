@@ -63,17 +63,14 @@ namespace MultiplayerGame.Models
         /// </summary>
         public void CheckValidity()
         {
-            Screen[] screens = Screen.AllScreens;
+            Point bullet = this.GetPoint();
 
-            foreach (Screen screen in screens)
+            if (bullet.X > Constant.GameAreaSizeX || bullet.X < 0 || bullet.Y < 0 || bullet.Y > Constant.GameAreaSizeY)
             {
-                if (screen.WorkingArea.Contains(this.GetPoint()))
-                {
-                    return;
-                }
+                this.InValidate();
             }
 
-            this.InValidate();
+            return;
         }
     }
 }
